@@ -1,6 +1,6 @@
 """Generates the IDE Chile plugin's plugin.json and src/catalog.rs from one table.
 
-    python plugins/ide-chile/generate.py && cargo fmt -p ide-chile
+    python generate.py && cargo fmt
 
 Edit the table (LAYERS), the groups and the translations here, never the two generated files.
 
@@ -235,7 +235,7 @@ def main():
         "version": "0.2.0",
         "description": "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query.",
         "author": "Daniel Díaz",
-        "homepage": "https://github.com/opengeos/rustgis-plugins/tree/main/plugins/ide-chile",
+        "homepage": "https://github.com/DanielD-S/rustgis-ide-chile",
         "license": "MIT",
         "entry": "plugin.wasm",
         "abi": 1,

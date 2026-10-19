@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      # plugin.json and src/catalog.rs are generated from generate.py: they must match it.
+      - name: Generated files are up to date
+        run: |
+          python generate.py
+          cargo fmt
+          git diff --exit-code
+      - name: Tests
+        run: cargo test --locked
+      - name: Build and package
+        run: python scripts/package.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: dist/
+          retention-days: 7

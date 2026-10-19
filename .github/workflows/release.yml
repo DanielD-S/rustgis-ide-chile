@@ -1,0 +1,41 @@
+name: Release
+
+# Push a tag vX.Y.Z (the version in plugin.json and Cargo.toml) to publish a release with the
+# package, its SHA-256 and the registry entry to submit to opengeos/rustgis-plugins.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Tests
+        run: cargo test --locked
+      - name: Build and package
+        run: python scripts/package.py --tag "$GITHUB_REF_NAME"
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "IDE Chile $GITHUB_REF_NAME. See CHANGELOG.md."
+            echo
+            echo "To list it, open a pull request on opengeos/rustgis-plugins that sets \`registry/ide-chile.json\` to:"
+            echo
+            echo '```json'
+            cat dist/registry-entry.json
+            echo '```'
+          } > notes.md
+          gh release create "$GITHUB_REF_NAME" dist/*.rgplugin dist/*.sha256 dist/registry-entry.json \
+            --title "IDE Chile $GITHUB_REF_NAME" --notes-file notes.md

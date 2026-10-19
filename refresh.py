@@ -1,6 +1,6 @@
 """Reads what each ArcGIS service in the table offers and writes services.json for generate.py.
 
-    python plugins/ide-chile/refresh.py && python plugins/ide-chile/generate.py && cargo fmt -p ide-chile
+    python refresh.py && python generate.py && cargo fmt
 
 For every ArcGIS entry: the service's queryable layers (group layers can't be queried), each with
 its name, geometry type and extent in Web Mercator (EPSG:3857), from which the plugin picks the
