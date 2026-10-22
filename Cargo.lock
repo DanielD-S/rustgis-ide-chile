@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "ide-chile"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "rustgis-plugin",
 ]
@@ -42,7 +42,7 @@ dependencies = [
 [[package]]
 name = "rustgis-plugin"
 version = "0.1.0"
-source = "git+https://github.com/opengeos/rustgis-plugins#ba7460c2e188bbdc01ca8e35358a197f9e954f10"
+source = "git+https://github.com/opengeos/rustgis-plugins#8a01594be0c77c0eae805e2e5fcb03cc01584fd4"
 dependencies = [
  "serde_json",
 ]
