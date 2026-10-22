@@ -51,6 +51,10 @@ pub struct Entry {
     pub whole: bool,
     /// The credit shown with the layer.
     pub credit: &'static str,
+    /// The generalisation of a read of the whole layer (`maxAllowableOffset`, in degrees): about
+    /// 10 m for most, coarser for the INE's Census 2024 boundaries, whose service answers finer
+    /// requests with no geometry (see `generate.py`).
+    pub offset: f64,
 }
 
 /// One queryable layer of an ArcGIS service.
@@ -73,9 +77,10 @@ const MAX_SUBS: usize = 8;
 /// out, the box would ask a national layer for most of itself.
 const MAX_VIEW_SCALE: f64 = 2_000_000.0;
 
-fn handle(mut req: Request) -> Result<Value, String> {
+/// Runs a command (a tool goes to `cut::run`, with its layers).
+pub(crate) fn handle(req: Request) -> Result<Value, String> {
     if req.kind == Kind::Tool {
-        return cut::run(&mut req);
+        return Err(format!("IDE Chile runs the tool '{}' through cut::run", req.id));
     }
     if let Some(e) = CATALOG.iter().find(|e| e.id == req.id) {
         return choose(&req, e, req.bool("map").unwrap_or(false));
@@ -87,10 +92,22 @@ fn handle(mut req: Request) -> Result<Value, String> {
     }
 }
 
-// The module's entry points. Only for the WebAssembly build: on a native target (the tests) they
-// would be roots that link the host's imports, which no native library provides.
+// The module's entry points, as the SDK's `export!` would make them but reading each request in
+// `cut::call`, which keeps the layers' geometry as text. Only for the WebAssembly build: on a
+// native target (the tests) they would be roots that link the host's imports, which no native
+// library provides.
 #[cfg(target_arch = "wasm32")]
-rustgis_plugin::export!(handle);
+mod entry {
+    #[unsafe(no_mangle)]
+    pub extern "C" fn rustgis_alloc(len: i32) -> i32 {
+        rustgis_plugin::abi::alloc(len)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn rustgis_call(ptr: i32, len: i32) -> i64 {
+        crate::cut::call(ptr, len)
+    }
+}
 
 /// The map's tile layers, top first: `[{"index", "name", "id", "overlay", …}]`.
 fn tile_layers() -> Result<Vec<Value>, String> {
@@ -162,9 +179,9 @@ pub fn arcgis_url(e: &Entry, sub: &Sub, view: Option<View>) -> String {
                 "&geometry={w:.0},{s:.0},{e:.0},{n:.0}&geometryType=esriGeometryEnvelope&inSR=3857&spatialRel=esriSpatialRelIntersects&resultRecordCount={IN_VIEW}&maxAllowableOffset={offset:.7}"
             ));
         }
-        // A whole layer is generalised to about 10 m, which makes national boundaries a few
-        // megabytes instead of tens; the map view has the full detail.
-        None => u.push_str("&maxAllowableOffset=0.0001"),
+        // A whole layer is generalised (to about 10 m, mostly), which makes national boundaries a
+        // few megabytes instead of tens; the map view has the full detail.
+        None => u.push_str(&format!("&maxAllowableOffset={}", e.offset)),
     }
     u
 }
@@ -342,6 +359,7 @@ mod tests {
                 other => panic!("{}: {other}", e.id),
             }
             assert!(!e.whole || e.kind == "wfs" || e.subs.len() == 1, "{}: a layer read whole is one layer", e.id);
+            assert!(e.offset > 0.0 && e.offset <= 0.05, "{}: offset {}", e.id, e.offset);
             if !e.tiles.is_empty() {
                 assert!(e.tiles.starts_with("https://") && e.tiles.contains("{bbox-epsg-3857}"), "{}: {}", e.id, e.tiles);
             }
@@ -388,7 +406,7 @@ mod tests {
             };
             // Without its layers the tool fails on a missing parameter, not on an unknown id.
             // (cut::run directly: handle() would link the host imports into the test binary.)
-            let err = cut::run(&mut req.clone()).unwrap_err();
+            let err = cut::run(&mut req.clone(), Default::default()).unwrap_err();
             assert!(err.contains("is required"), "{}: {err}", t["id"]);
             for p in t["params"].as_array().unwrap() {
                 let kind = p["kind"].as_str().unwrap();
@@ -478,6 +496,11 @@ mod tests {
             "{}",
             r[0].1
         );
+        // The INE's Census 2024 boundaries: the coarsest generalisation that keeps them whole.
+        let communes_2024 = CATALOG.iter().find(|e| e.id == "census-2024-communes").unwrap();
+        assert!(reads(communes_2024, None)[0].1.ends_with("&maxAllowableOffset=0.005"), "{}", reads(communes_2024, None)[0].1);
+        let regions_2024 = CATALOG.iter().find(|e| e.id == "census-2024-regions").unwrap();
+        assert!(reads(regions_2024, None)[0].1.ends_with("&maxAllowableOffset=0.02"), "{}", reads(regions_2024, None)[0].1);
         // A WFS feature type in the view.
         let wetlands = CATALOG.iter().find(|e| e.id == "wetlands").unwrap();
         let r = reads(wetlands, Some(santiago()));

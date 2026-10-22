@@ -1,7 +1,7 @@
 {
   "id": "ide-chile",
   "name": "IDE Chile",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names.",
   "author": "Daniel Díaz",
   "homepage": "https://github.com/DanielD-S/rustgis-ide-chile",
@@ -200,21 +200,21 @@
     {
       "id": "census-2024-regions",
       "label": "Regions",
-      "help": "The 16 regions of the Census 2024 political-administrative division (INE): a download of about 10 MB.",
+      "help": "The 16 regions of the Census 2024 political-administrative division (INE), generalised to about 2 km: a download of about 2 MB.",
       "icon": "polygon_layer",
       "params": "{\"map\"?: bool (the service's own map image as a web tile layer under the layers, instead of the features)}"
     },
     {
       "id": "census-2024-provinces",
       "label": "Provinces",
-      "help": "The 56 provinces of the Census 2024 political-administrative division (INE): a download of about 27 MB.",
+      "help": "The 56 provinces of the Census 2024 political-administrative division (INE), generalised to about 2 km: a download of about 3 MB.",
       "icon": "polygon_layer",
       "params": "{\"map\"?: bool (the service's own map image as a web tile layer under the layers, instead of the features)}"
     },
     {
       "id": "census-2024-communes",
       "label": "Communes",
-      "help": "The communes of the Census 2024 political-administrative division, with their CUT codes (INE): a download of about 25 MB.",
+      "help": "The communes of the Census 2024 political-administrative division, with their CUT codes (INE), generalised to about 500 m: a download of about 17 MB.",
       "icon": "polygon_layer",
       "params": "{\"map\"?: bool (the service's own map image as a web tile layer under the layers, instead of the features)}"
     },
@@ -756,10 +756,10 @@
       "Quantitative housing deficit by commune (Census 2024).": "Déficit habitacional cuantitativo por comuna (Censo 2024).",
       "Bike Lanes": "Ciclovías",
       "Bike lanes built by MINVU, their counters and nearby facilities.": "Ciclovías construidas por el MINVU, sus contadores y equipamientos cercanos.",
-      "The 16 regions of the Census 2024 political-administrative division (INE): a download of about 10 MB.": "Las 16 regiones de la división político-administrativa del Censo 2024 (INE): una descarga de unos 10 MB.",
+      "The 16 regions of the Census 2024 political-administrative division (INE), generalised to about 2 km: a download of about 2 MB.": "Las 16 regiones de la división político-administrativa del Censo 2024 (INE), generalizadas a unos 2 km: una descarga de unos 2 MB.",
       "Provinces": "Provincias",
-      "The 56 provinces of the Census 2024 political-administrative division (INE): a download of about 27 MB.": "Las 56 provincias de la división político-administrativa del Censo 2024 (INE): una descarga de unos 27 MB.",
-      "The communes of the Census 2024 political-administrative division, with their CUT codes (INE): a download of about 25 MB.": "Las comunas de la división político-administrativa del Censo 2024, con su código único territorial (INE): una descarga de unos 25 MB.",
+      "The 56 provinces of the Census 2024 political-administrative division (INE), generalised to about 2 km: a download of about 3 MB.": "Las 56 provincias de la división político-administrativa del Censo 2024 (INE), generalizadas a unos 2 km: una descarga de unos 3 MB.",
+      "The communes of the Census 2024 political-administrative division, with their CUT codes (INE), generalised to about 500 m: a download of about 17 MB.": "Las comunas de la división político-administrativa del Censo 2024, con su código único territorial (INE), generalizadas a unos 500 m: una descarga de unos 17 MB.",
       "Commune Indicators": "Indicadores por comuna",
       "Census 2024 indicators by commune (INE): dwellings, households, population by sex and age group, ageing index.": "Indicadores del Censo 2024 por comuna (INE): viviendas, hogares, población por sexo y grupo de edad, índice de envejecimiento.",
       "Region Indicators": "Indicadores por región",

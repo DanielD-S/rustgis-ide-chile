@@ -39,6 +39,16 @@ def export(base, show=None):
     return t
 
 
+# The generalisation (maxAllowableOffset, in degrees) of a layer read whole: about 10 m, which makes
+# national boundaries a few megabytes instead of tens. The INE's Census 2024 boundary service
+# (Límites DPA) answers with no geometry at all below about 0.003° and serves a few fixed levels,
+# so its layers ask for the coarsest that keeps them whole (checked on 2026-10-22: communes 17 MB
+# at 0.005°, provinces 2.8 MB and regions 2.4 MB at 0.02°; at 0.0001° all but two came empty).
+OFFSET = 0.0001
+DPA_FINE = 0.005
+DPA_COARSE = 0.02
+
+
 def subs_of(id, show=None):
     """An ArcGIS service's queryable layers (the ones in `show`, or all): (id, name, bbox)."""
     layers = SERVICES[id]["layers"]
@@ -48,13 +58,13 @@ def subs_of(id, show=None):
     return [(l["id"], l["name"], l["bbox"] if isinstance(l.get("bbox"), list) else None) for l in chosen]
 
 
-def arcgis(id, en, es, help_en, help_es, base, credit, show=None, whole=False, icon="polygon_layer", name=None, tiles=True):
+def arcgis(id, en, es, help_en, help_es, base, credit, show=None, whole=False, icon="polygon_layer", name=None, tiles=True, offset=OFFSET):
     subs = subs_of(id, show)
     assert not whole or len(subs) == 1, (id, "a layer read whole is one layer")
     return dict(
         id=id, en=en, es=es, help_en=help_en, help_es=help_es, name=name or es, icon=icon,
         tiles=export(base, show) if tiles else "", service=base, kind="arcgis", layer="", subs=subs,
-        whole=whole, credit=credit,
+        whole=whole, credit=credit, offset=offset,
     )
 
 
@@ -66,20 +76,20 @@ def minvu(id, en, es, help_en, help_es, service, show=None, whole=False, icon="p
     return arcgis(id, en, es, help_en, help_es, MINVU.format(service), MINVU_CREDIT, show, whole, icon, name)
 
 
-def ine(id, en, es, help_en, help_es, service, show=None, whole=False, icon="polygon_layer", name=None, credit=INE_CREDIT):
+def ine(id, en, es, help_en, help_es, service, show=None, whole=False, icon="polygon_layer", name=None, credit=INE_CREDIT, offset=OFFSET):
     # A hosted feature service draws no map image.
-    return arcgis(id, en, es, help_en, help_es, INE.format(service), credit, show, whole, icon, name, tiles=False)
+    return arcgis(id, en, es, help_en, help_es, INE.format(service), credit, show, whole, icon, name, tiles=False, offset=offset)
 
 
-def ine_2024(id, en, es, help_en, help_es, service, show=None, whole=False, icon="polygon_layer", name=None):
-    return ine(id, en, es, help_en, help_es, service, show, whole, icon, name, credit=INE_2024_CREDIT)
+def ine_2024(id, en, es, help_en, help_es, service, show=None, whole=False, icon="polygon_layer", name=None, offset=OFFSET):
+    return ine(id, en, es, help_en, help_es, service, show, whole, icon, name, credit=INE_2024_CREDIT, offset=offset)
 
 
 def geoportal(id, en, es, help_en, help_es, workspace, typename, publisher, whole=False, icon="point_layer", name=None):
     return dict(
         id=id, en=en, es=es, help_en=help_en, help_es=help_es, name=name or es, icon=icon,
         tiles="", service=GEOPORTAL.format(workspace), kind="wfs", layer=f"{workspace}:{typename}", subs=[],
-        whole=whole, credit=GEOPORTAL_CREDIT.format(publisher),
+        whole=whole, credit=GEOPORTAL_CREDIT.format(publisher), offset=OFFSET,
     )
 
 
@@ -120,9 +130,9 @@ LAYERS = [
     minvu("bike-lanes", "Bike Lanes", "Ciclovías", "Bike lanes built by MINVU, their counters and nearby facilities.", "Ciclovías construidas por el MINVU, sus contadores y equipamientos cercanos.", "Planes_Programas/Ciclov%C3%ADas_Minvu", icon="line_layer", name="Ciclovías (MINVU)"),
     # Census 2024 (INE): the political-administrative division (DPA) the census was taken on, its
     # indicators by commune and region, and the neighbourhood units with their figures.
-    ine_2024("census-2024-regions", "Regions", "Regiones", "The 16 regions of the Census 2024 political-administrative division (INE): a download of about 10 MB.", "Las 16 regiones de la división político-administrativa del Censo 2024 (INE): una descarga de unos 10 MB.", "L%C3%ADmites_DPA___Censo_2024", show=[2], whole=True, name="Censo 2024: regiones"),
-    ine_2024("census-2024-provinces", "Provinces", "Provincias", "The 56 provinces of the Census 2024 political-administrative division (INE): a download of about 27 MB.", "Las 56 provincias de la división político-administrativa del Censo 2024 (INE): una descarga de unos 27 MB.", "L%C3%ADmites_DPA___Censo_2024", show=[3], whole=True, name="Censo 2024: provincias"),
-    ine_2024("census-2024-communes", "Communes", "Comunas", "The communes of the Census 2024 political-administrative division, with their CUT codes (INE): a download of about 25 MB.", "Las comunas de la división político-administrativa del Censo 2024, con su código único territorial (INE): una descarga de unos 25 MB.", "L%C3%ADmites_DPA___Censo_2024", show=[4], whole=True, name="Censo 2024: comunas"),
+    ine_2024("census-2024-regions", "Regions", "Regiones", "The 16 regions of the Census 2024 political-administrative division (INE), generalised to about 2 km: a download of about 2 MB.", "Las 16 regiones de la división político-administrativa del Censo 2024 (INE), generalizadas a unos 2 km: una descarga de unos 2 MB.", "L%C3%ADmites_DPA___Censo_2024", show=[2], whole=True, name="Censo 2024: regiones", offset=DPA_COARSE),
+    ine_2024("census-2024-provinces", "Provinces", "Provincias", "The 56 provinces of the Census 2024 political-administrative division (INE), generalised to about 2 km: a download of about 3 MB.", "Las 56 provincias de la división político-administrativa del Censo 2024 (INE), generalizadas a unos 2 km: una descarga de unos 3 MB.", "L%C3%ADmites_DPA___Censo_2024", show=[3], whole=True, name="Censo 2024: provincias", offset=DPA_COARSE),
+    ine_2024("census-2024-communes", "Communes", "Comunas", "The communes of the Census 2024 political-administrative division, with their CUT codes (INE), generalised to about 500 m: a download of about 17 MB.", "Las comunas de la división político-administrativa del Censo 2024, con su código único territorial (INE), generalizadas a unos 500 m: una descarga de unos 17 MB.", "L%C3%ADmites_DPA___Censo_2024", show=[4], whole=True, name="Censo 2024: comunas", offset=DPA_FINE),
     ine_2024("census-2024-commune-indicators", "Commune Indicators", "Indicadores por comuna", "Census 2024 indicators by commune (INE): dwellings, households, population by sex and age group, ageing index.", "Indicadores del Censo 2024 por comuna (INE): viviendas, hogares, población por sexo y grupo de edad, índice de envejecimiento.", "CENSO2024_V2_gdb", show=[0], whole=True, icon="stats", name="Censo 2024: indicadores por comuna"),
     ine_2024("census-2024-region-indicators", "Region Indicators", "Indicadores por región", "Census 2024 indicators by region (INE): dwellings, households, population by sex and age group, ageing index.", "Indicadores del Censo 2024 por región (INE): viviendas, hogares, población por sexo y grupo de edad, índice de envejecimiento.", "CENSO2024_V2_gdb", show=[1], whole=True, icon="stats", name="Censo 2024: indicadores por región"),
     ine_2024("census-2024-neighbourhoods", "Neighbourhood Units", "Unidades vecinales", "Census 2024 figures by neighbourhood unit (unidad vecinal, INE): population by age, migration, indigenous peoples, commuting, schooling and housing. Read in the map view, up to 2,000 at a time.", "Cifras del Censo 2024 por unidad vecinal (INE): población por edad, migración, pueblos originarios, transporte, escolaridad y vivienda. Se lee en la vista del mapa, hasta 2.000 por vez.", "UV_Nacional", name="Censo 2024: unidades vecinales"),
@@ -167,7 +177,7 @@ TAB = [
 
 PARAMS = '{"map"?: bool (the service\'s own map image as a web tile layer under the layers, instead of the features)}'
 
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 DESCRIPTION = "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names."
 DESCRIPTION_ES = "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU y los Censos 2024 y 2017 del INE. Límites, suelos, uso de la tierra, humedales, hidrografía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables. Las herramientas CUT unen cualquier tabla de Chile a sus comunas, provincias o regiones por su código único territorial, asignan comunas a puntos y completan códigos y nombres."
 
@@ -540,7 +550,7 @@ def main():
     for e in LAYERS:
         subs = "&[" + ", ".join(sub(l) for l in e["subs"]) + "]"
         rows.append(
-            f"    Entry {{ id: {s(e['id'])}, name: {s(e['name'])}, tiles: {s(e['tiles'])}, service: {s(e['service'])}, kind: {s(e['kind'])}, layer: {s(e['layer'])}, subs: {subs}, whole: {'true' if e['whole'] else 'false'}, credit: {s(e['credit'])} }},"
+            f"    Entry {{ id: {s(e['id'])}, name: {s(e['name'])}, tiles: {s(e['tiles'])}, service: {s(e['service'])}, kind: {s(e['kind'])}, layer: {s(e['layer'])}, subs: {subs}, whole: {'true' if e['whole'] else 'false'}, credit: {s(e['credit'])}, offset: {e['offset']!r} }},"
         )
     rs = "//! The layer catalog. Generated by `generate.py`: edit the table there, not this file.\n\nuse crate::{Entry, Sub};\n\n/// Every layer the plugin offers, in ribbon order.\npub const CATALOG: &[Entry] = &[\n" + "\n".join(rows) + "\n];\n"
     (root / "src" / "catalog.rs").write_text(rs, encoding="utf-8")

@@ -35,6 +35,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "communes",
@@ -51,6 +52,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "soils",
@@ -93,6 +95,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "land-use",
@@ -175,6 +178,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "rural-properties",
@@ -209,6 +213,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "irrigation",
@@ -225,6 +230,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "erosion",
@@ -329,6 +335,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "fruit-cadastre",
@@ -661,6 +668,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "weather-stations",
@@ -676,6 +684,7 @@ pub const CATALOG: &[Entry] = &[
         }],
         whole: true,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "summer-pastures",
@@ -687,6 +696,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "VERANADAS", bbox: Some([-7978666.0, -4806050.0, -7795305.0, -3545864.0]) }],
         whole: true,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "hunting-ban",
@@ -698,6 +708,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "ÁREAS PROHIBIDAS DE CAZA DE 2013", bbox: Some([-8244369.0, -7119677.0, -7616856.0, -3301773.0]) }],
         whole: true,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "wildfires",
@@ -722,6 +733,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "ramsar",
@@ -733,6 +745,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "HUMEDALES RAMSAR 2013", bbox: Some([-7989192.0, -4003639.0, -7483076.0, -2130016.0]) }],
         whole: true,
         credit: "IDE MINAGRI / CIREN (esri.ciren.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "wetlands",
@@ -744,6 +757,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: false,
         credit: "Geoportal de Chile, IDE Chile (MMA)",
+        offset: 0.0001,
     },
     Entry {
         id: "hydrography",
@@ -755,6 +769,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: false,
         credit: "Geoportal de Chile, IDE Chile (SNIT)",
+        offset: 0.0001,
     },
     Entry {
         id: "basins",
@@ -766,6 +781,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (MOP)",
+        offset: 0.0001,
     },
     Entry {
         id: "aquifers",
@@ -777,6 +793,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (MOP)",
+        offset: 0.0001,
     },
     Entry {
         id: "climate-zones",
@@ -788,6 +805,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (U. de Chile)",
+        offset: 0.0001,
     },
     Entry {
         id: "urban-limits",
@@ -805,6 +823,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINVU (geoide.minvu.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "risk-areas",
@@ -819,6 +838,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINVU (geoide.minvu.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "heritage",
@@ -833,6 +853,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINVU (geoide.minvu.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "urban-wetlands",
@@ -844,6 +865,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "inventario_humedales_2020_v5", bbox: None }],
         whole: false,
         credit: "IDE MINVU (geoide.minvu.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "settlements",
@@ -855,6 +877,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "Catastro 2026", bbox: Some([-8215791.0, -7011169.0, -7591705.0, -2082915.0]) }],
         whole: true,
         credit: "IDE MINVU (geoide.minvu.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "urban-parks",
@@ -866,6 +889,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 1, name: "Parques Urbanos", bbox: Some([-12182714.0, -7039640.0, -7669829.0, -2087612.0]) }],
         whole: true,
         credit: "IDE MINVU (geoide.minvu.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "housing-deficit",
@@ -881,6 +905,7 @@ pub const CATALOG: &[Entry] = &[
         }],
         whole: false,
         credit: "IDE MINVU (geoide.minvu.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "bike-lanes",
@@ -898,6 +923,7 @@ pub const CATALOG: &[Entry] = &[
         ],
         whole: false,
         credit: "IDE MINVU (geoide.minvu.cl)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-2024-regions",
@@ -909,6 +935,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 2, name: "Regional", bbox: None }],
         whole: true,
         credit: "INE, Censo 2024 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.02,
     },
     Entry {
         id: "census-2024-provinces",
@@ -920,6 +947,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 3, name: "Provincial", bbox: None }],
         whole: true,
         credit: "INE, Censo 2024 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.02,
     },
     Entry {
         id: "census-2024-communes",
@@ -931,6 +959,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 4, name: "Comunal", bbox: None }],
         whole: true,
         credit: "INE, Censo 2024 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.005,
     },
     Entry {
         id: "census-2024-commune-indicators",
@@ -942,6 +971,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "COMUNA_DPA_INDICADORES", bbox: Some([-12184460.0, -7555025.0, -7393425.0, -1978920.0]) }],
         whole: true,
         credit: "INE, Censo 2024 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-2024-region-indicators",
@@ -953,6 +983,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 1, name: "REGION_DPA_INDICADORES", bbox: Some([-12184460.0, -7555025.0, -7393425.0, -1978920.0]) }],
         whole: true,
         credit: "INE, Censo 2024 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-2024-neighbourhoods",
@@ -964,6 +995,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "UUVV_NACIONAL", bbox: Some([-12184461.0, -7666223.0, -7393349.0, -1978920.0]) }],
         whole: false,
         credit: "INE, Censo 2024 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-regions",
@@ -975,6 +1007,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "Cifras_Regiones_2017", bbox: Some([-12184460.0, -30240972.0, -6119163.0, -1978847.0]) }],
         whole: true,
         credit: "INE, Censo 2017 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-provinces",
@@ -986,6 +1019,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "Cifras_Provincias_2017", bbox: Some([-12184460.0, -30240972.0, -6119163.0, -1978847.0]) }],
         whole: true,
         credit: "INE, Censo 2017 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-communes",
@@ -997,6 +1031,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "Cifras_Comunas_2017", bbox: Some([-12184460.0, -30240972.0, -6119163.0, -1978847.0]) }],
         whole: true,
         credit: "INE, Censo 2017 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-blocks",
@@ -1008,6 +1043,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "Manzana_2017_2", bbox: Some([-12183256.0, -7350097.0, -7523825.0, -2060205.0]) }],
         whole: false,
         credit: "INE, Censo 2017 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-localities",
@@ -1019,6 +1055,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "Entidad_2017_2", bbox: Some([-12183912.0, -7664263.0, -7393412.0, -1978920.0]) }],
         whole: false,
         credit: "INE, Censo 2017 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-cities",
@@ -1030,6 +1067,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "Ciudades_2017", bbox: Some([-12183256.0, -7350097.0, -7523825.0, -2060205.0]) }],
         whole: true,
         credit: "INE, Censo 2017 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-towns",
@@ -1041,6 +1079,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "Pueblos_2017", bbox: Some([-8209901.0, -5696187.0, -7715485.0, -2097853.0]) }],
         whole: true,
         credit: "INE, Censo 2017 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-villages",
@@ -1052,6 +1091,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "Aldeas_2017", bbox: Some([-8776338.0, -6997498.0, -7569552.0, -2082703.0]) }],
         whole: true,
         credit: "INE, Censo 2017 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "census-hamlets",
@@ -1063,6 +1103,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[Sub { id: 0, name: "Caserios_2017", bbox: Some([-12180543.0, -7426509.0, -7463266.0, -1988548.0]) }],
         whole: false,
         credit: "INE, Censo 2017 (geoine-ine-chile.opendata.arcgis.com)",
+        offset: 0.0001,
     },
     Entry {
         id: "roads",
@@ -1074,6 +1115,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: false,
         credit: "Geoportal de Chile, IDE Chile (Instituto de la Propiedad)",
+        offset: 0.0001,
     },
     Entry {
         id: "railways",
@@ -1085,6 +1127,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (BCN)",
+        offset: 0.0001,
     },
     Entry {
         id: "airports",
@@ -1096,6 +1139,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (MOP)",
+        offset: 0.0001,
     },
     Entry {
         id: "schools",
@@ -1107,6 +1151,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: false,
         credit: "Geoportal de Chile, IDE Chile (Mineduc)",
+        offset: 0.0001,
     },
     Entry {
         id: "preschools",
@@ -1118,6 +1163,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: false,
         credit: "Geoportal de Chile, IDE Chile (Mineduc)",
+        offset: 0.0001,
     },
     Entry {
         id: "higher-education",
@@ -1129,6 +1175,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (Mineduc)",
+        offset: 0.0001,
     },
     Entry {
         id: "health-services",
@@ -1140,6 +1187,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (Minsal)",
+        offset: 0.0001,
     },
     Entry {
         id: "police",
@@ -1151,6 +1199,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (Carabineros)",
+        offset: 0.0001,
     },
     Entry {
         id: "municipalities",
@@ -1162,6 +1211,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (SUBDERE)",
+        offset: 0.0001,
     },
     Entry {
         id: "capitals",
@@ -1173,6 +1223,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (SNIT)",
+        offset: 0.0001,
     },
     Entry {
         id: "tourist-attractions",
@@ -1184,6 +1235,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (Sernatur)",
+        offset: 0.0001,
     },
     Entry {
         id: "street-markets",
@@ -1195,6 +1247,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (SNIT)",
+        offset: 0.0001,
     },
     Entry {
         id: "sports",
@@ -1206,6 +1259,7 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: false,
         credit: "Geoportal de Chile, IDE Chile (Mindep)",
+        offset: 0.0001,
     },
     Entry {
         id: "sendero",
@@ -1217,5 +1271,6 @@ pub const CATALOG: &[Entry] = &[
         subs: &[],
         whole: true,
         credit: "Geoportal de Chile, IDE Chile (MMA)",
+        offset: 0.0001,
     },
 ];

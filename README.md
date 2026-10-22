@@ -49,7 +49,10 @@ falls back to the map image where there is one and otherwise gives the address t
 
 - Small layers (census communes, capitals, airports, Ramsar wetlands…) are read whole and zoomed
   to; ArcGIS layers read whole are generalised to about 10 m, so national data stays a few
-  megabytes.
+  megabytes. The INE's Census 2024 boundaries are the exception: their service answers a request
+  finer than about 0.003° with no geometry at all, so they come generalised to about 500 m
+  (communes, 17 MB) and 2 km (provinces and regions, about 3 MB each); the IDE MINAGRI
+  boundaries have the full detail in the map view.
 - Large layers (communes, soils, land use, the wetlands inventory, hydrography, the road
   network, census blocks, schools…) are read in the current map view, up to 5,000 features at a
   time (2,000 from ArcGIS servers), generalised to the view's pixel: zoom to your area first

@@ -19,7 +19,9 @@
 
 use std::collections::HashMap;
 
-use rustgis_plugin::{Map, Request, ToolOutput, Value, geojson, json};
+use rustgis_plugin::{Kind, Map, Request, Value, geojson, json, serde_json};
+use serde::{Deserialize, Deserializer};
+use serde_json::value::RawValue;
 
 use crate::MANIFEST;
 use crate::communes::{COMMUNE_ALIASES, COMMUNES, DATE, OLD_CUTS, PROVINCES, REGION_ALIASES, REGIONS};
@@ -791,9 +793,195 @@ fn fill(text: &str, args: &[(&str, &str)]) -> String {
     out
 }
 
-/// The feature's properties as an object (an empty one when it has none).
-fn properties(f: &Value) -> Map<String, Value> {
-    f.get("properties").and_then(Value::as_object).cloned().unwrap_or_default()
+/// A feature with its geometry kept as the JSON text it came as. A tool that reads and writes
+/// attributes copies the geometry through, parsing and formatting none of its coordinates: the
+/// Census 2024 communes are 25 MB of them, which parsed into a JSON tree and written back ran
+/// the tool out of its instruction budget.
+#[derive(Debug, Deserialize)]
+pub struct RawFeature {
+    #[serde(default)]
+    pub id: Option<Value>,
+    #[serde(default)]
+    pub geometry: Option<Box<RawValue>>,
+    #[serde(default, deserialize_with = "null_as_empty")]
+    pub properties: Map<String, Value>,
+}
+
+impl RawFeature {
+    /// The geometry parsed, for the tools that read it (the polygons points fall in).
+    pub fn geometry(&self) -> Option<Value> {
+        serde_json::from_str(self.geometry.as_ref()?.get()).ok()
+    }
+}
+
+fn null_as_empty<'de, D: Deserializer<'de>>(d: D) -> Result<Map<String, Value>, D::Error> {
+    Ok(Option::<Map<String, Value>>::deserialize(d)?.unwrap_or_default())
+}
+
+/// A layer as a tool gets it: a FeatureCollection, by its features.
+#[derive(Debug, Default, Deserialize)]
+pub struct RawLayer {
+    #[serde(default)]
+    pub features: Vec<RawFeature>,
+}
+
+/// A tool's layers, by name.
+pub type Layers = HashMap<String, RawLayer>;
+
+/// What a tool returns: layers of raw features, standalone tables and messages, as the SDK's
+/// `ToolOutput` but written to JSON by [`Output::to_json`], the geometry copied through.
+#[derive(Debug, Default)]
+pub struct Output {
+    pub layers: Vec<(String, Vec<RawFeature>)>,
+    pub tables: Vec<(String, Value)>,
+    pub messages: Vec<String>,
+}
+
+impl Output {
+    pub fn new() -> Output {
+        Output::default()
+    }
+
+    pub fn layer(mut self, name: &str, features: Vec<RawFeature>) -> Output {
+        self.layers.push((name.to_string(), features));
+        self
+    }
+
+    /// A standalone table: a FeatureCollection whose features have no geometry.
+    pub fn table(mut self, name: &str, feature_collection: Value) -> Output {
+        self.tables.push((name.to_string(), feature_collection));
+        self
+    }
+
+    pub fn message(mut self, text: impl Into<String>) -> Output {
+        self.messages.push(text.into());
+        self
+    }
+
+    /// The `{"layers", "tables", "messages"}` object RustGIS reads, as JSON text.
+    pub fn to_json(&self) -> String {
+        fn text(v: &impl serde::Serialize) -> String {
+            serde_json::to_string(v).unwrap_or_else(|_| "null".to_string())
+        }
+        let geometry_bytes: usize =
+            self.layers.iter().flat_map(|(_, fs)| fs.iter()).filter_map(|f| f.geometry.as_ref()).map(|g| g.get().len()).sum();
+        let features: usize = self.layers.iter().map(|(_, fs)| fs.len()).sum();
+        let mut s = String::with_capacity(geometry_bytes + 1024 * features + 4096);
+        s.push_str("{\"layers\":[");
+        for (i, (name, features)) in self.layers.iter().enumerate() {
+            if i > 0 {
+                s.push(',');
+            }
+            s.push_str("{\"name\":");
+            s.push_str(&text(name));
+            s.push_str(",\"geojson\":{\"type\":\"FeatureCollection\",\"features\":[");
+            for (j, f) in features.iter().enumerate() {
+                if j > 0 {
+                    s.push(',');
+                }
+                s.push_str("{\"type\":\"Feature\"");
+                if let Some(id) = &f.id {
+                    s.push_str(",\"id\":");
+                    s.push_str(&text(id));
+                }
+                s.push_str(",\"geometry\":");
+                s.push_str(f.geometry.as_ref().map_or("null", |g| g.get()));
+                s.push_str(",\"properties\":");
+                s.push_str(&text(&f.properties));
+                s.push('}');
+            }
+            s.push_str("]}}");
+        }
+        s.push_str("],\"tables\":[");
+        for (i, (name, fc)) in self.tables.iter().enumerate() {
+            if i > 0 {
+                s.push(',');
+            }
+            s.push_str("{\"name\":");
+            s.push_str(&text(name));
+            s.push_str(",\"geojson\":");
+            s.push_str(&text(fc));
+            s.push('}');
+        }
+        s.push_str("],\"messages\":");
+        s.push_str(&text(&self.messages));
+        s.push('}');
+        s
+    }
+}
+
+/// A request as RustGIS writes it, the layers' geometry kept as text.
+#[derive(Deserialize)]
+struct RawRequest {
+    #[serde(default)]
+    kind: String,
+    #[serde(default)]
+    id: String,
+    #[serde(default)]
+    params: Value,
+    #[serde(default)]
+    layers: Layers,
+    #[serde(default)]
+    files: Map<String, Value>,
+    #[serde(default)]
+    lang: Option<String>,
+    #[serde(default)]
+    panel: Option<Value>,
+}
+
+/// The module's entry point for every request (`rustgis_call`, see lib.rs), as the SDK's
+/// `abi::call` but reading the request with [`RawRequest`]: a tool runs here on its raw layers,
+/// a command goes to `handle`. The reply is `{"ok": …}` or `{"error": "…"}`, left in memory for
+/// RustGIS to read (each call gets a fresh instance).
+pub fn call(ptr: i32, len: i32) -> i64 {
+    let len = usize::try_from(len).unwrap_or(0);
+    // SAFETY: RustGIS wrote `len` bytes at `ptr`, a buffer `rustgis_alloc` made with that capacity.
+    let bytes = unsafe { Vec::from_raw_parts(ptr as *mut u8, len, len) };
+    let reply = match serde_json::from_slice::<RawRequest>(&bytes) {
+        Ok(r) => {
+            // The request's text isn't needed once it's read: room for the tool.
+            drop(bytes);
+            match dispatch(r) {
+                Ok(ok) => ok,
+                Err(e) => json!({"error": e}).to_string(),
+            }
+        }
+        Err(e) => json!({"error": format!("unreadable request: {e}")}).to_string(),
+    };
+    let out: Box<[u8]> = reply.into_bytes().into_boxed_slice();
+    let n = out.len() as i64;
+    let p = Box::into_raw(out) as *mut u8 as i64;
+    (p << 32) | n
+}
+
+/// The reply to a request: `{"ok": …}` as text.
+fn dispatch(r: RawRequest) -> Result<String, String> {
+    let panel = r.panel.as_ref();
+    let panel_values = match panel.and_then(|p| p.get("values")) {
+        Some(Value::Object(m)) => m.clone(),
+        _ => Map::new(),
+    };
+    let panel_changed = panel
+        .and_then(|p| p.get("changed"))
+        .and_then(Value::as_array)
+        .map(|a| a.iter().filter_map(Value::as_str).map(str::to_string).collect())
+        .unwrap_or_default();
+    let mut req = Request {
+        kind: if r.kind == "tool" { Kind::Tool } else { Kind::Command },
+        id: r.id,
+        params: r.params,
+        layers: Map::new(),
+        files: r.files,
+        lang: r.lang.unwrap_or_else(|| "en".to_string()),
+        panel: panel_values,
+        panel_changed,
+    };
+    if req.kind == Kind::Tool {
+        let out = run(&mut req, r.layers)?;
+        Ok(format!("{{\"ok\":{}}}", out.to_json()))
+    } else {
+        Ok(json!({"ok": crate::handle(req)?}).to_string())
+    }
 }
 
 /// Writes one of the INE's fields. A value the feature already had there, when it differs, is
@@ -809,34 +997,28 @@ fn write_field(props: &mut Map<String, Value>, k: &str, v: Value, keep_empty: bo
     props.insert(k.to_string(), v);
 }
 
-/// The features of the layer a tool parameter names, taken out of the request rather than
-/// copied: a tool reads each layer once, and the result is built by moving its features.
-fn take_features(req: &mut Request, param: &str) -> Result<Vec<Value>, String> {
-    let name = req.str(param).ok_or_else(|| format!("'{param}' is required"))?.to_string();
-    let mut layer = req.layers.remove(&name).ok_or_else(|| format!("no layer named '{name}'"))?;
-    Ok(match layer.get_mut("features").map(Value::take) {
-        Some(Value::Array(features)) => features,
-        _ => Vec::new(),
-    })
+/// The features of the layer a tool parameter names, taken out of the request's layers rather
+/// than copied: a tool reads each layer once, and the result is built by moving its features.
+fn take_features(layers: &mut Layers, req: &Request, param: &str) -> Result<Vec<RawFeature>, String> {
+    let name = req.str(param).ok_or_else(|| format!("'{param}' is required"))?;
+    layers.remove(name).map(|l| l.features).ok_or_else(|| format!("no layer named '{name}'"))
 }
 
 /// The fields of a layer's features (the first 500), in order of appearance, with their values
 /// as columns.
-fn layer_columns(features: &[Value]) -> Vec<(String, Vec<&Value>)> {
+fn layer_columns(features: &[RawFeature]) -> Vec<(String, Vec<&Value>)> {
     let mut names: Vec<String> = Vec::new();
     for f in features.iter().take(500) {
-        if let Some(p) = f.get("properties").and_then(Value::as_object) {
-            for k in p.keys() {
-                if !names.contains(k) {
-                    names.push(k.clone());
-                }
+        for k in f.properties.keys() {
+            if !names.contains(k) {
+                names.push(k.clone());
             }
         }
     }
     names
         .into_iter()
         .map(|n| {
-            let values = features.iter().take(5000).map(|f| f.get("properties").and_then(|p| p.get(&n)).unwrap_or(&Value::Null)).collect();
+            let values = features.iter().take(5000).map(|f| f.properties.get(&n).unwrap_or(&Value::Null)).collect();
             (n, values)
         })
         .collect()
@@ -846,7 +1028,7 @@ fn layer_columns(features: &[Value]) -> Vec<(String, Vec<&Value>)> {
 fn layer_key(
     req: &Request,
     index: &Index,
-    features: &[Value],
+    features: &[RawFeature],
     named: Option<&str>,
     only: Option<Level>,
 ) -> Result<Option<(String, Level)>, String> {
@@ -911,20 +1093,20 @@ impl Words {
     }
 }
 
-/// Runs the tool `id` with the request.
-pub fn run(req: &mut Request) -> Result<Value, String> {
+/// Runs the tool `id` with the request and its layers.
+pub fn run(req: &mut Request, mut layers: Layers) -> Result<Output, String> {
     match req.id.as_str() {
-        "join-cut" => join(req),
-        "assign-cut" => assign(req),
-        "complete-cut" => complete(req),
+        "join-cut" => join(req, &mut layers),
+        "assign-cut" => assign(req, &mut layers),
+        "complete-cut" => complete(req, &mut layers),
         other => Err(format!("IDE Chile has no tool '{other}'")),
     }
 }
 
 /// Join Table by CUT.
-fn join(req: &mut Request) -> Result<Value, String> {
+fn join(req: &mut Request, layers: &mut Layers) -> Result<Output, String> {
     let layer_name = req.str("layer").unwrap_or("layer").to_string();
-    let features = take_features(req, "layer")?;
+    let features = take_features(layers, req, "layer")?;
     let all_features = features.len();
     if features.is_empty() {
         return Err(tr(req, "{name} has no features.", &[("name", &layer_name)]));
@@ -994,8 +1176,7 @@ fn join(req: &mut Request) -> Result<Value, String> {
     // The field each table column lands in, decided once so every feature gets the same ones:
     // its own name, or <name>_2 (then _2_2…) when the layer has a field of that name, another
     // column is called that, or an earlier column already landed there.
-    let layer_fields: std::collections::HashSet<&str> =
-        features.iter().filter_map(|f| f.get("properties").and_then(Value::as_object)).flat_map(|p| p.keys().map(String::as_str)).collect();
+    let layer_fields: std::collections::HashSet<&str> = features.iter().flat_map(|f| f.properties.keys().map(String::as_str)).collect();
     let mut produced: std::collections::HashSet<String> = std::collections::HashSet::new();
     let mut targets: Vec<Option<String>> = Vec::with_capacity(table.columns.len());
     let mut renamed: Vec<String> = Vec::new();
@@ -1018,7 +1199,7 @@ fn join(req: &mut Request) -> Result<Value, String> {
         targets.push(Some(field));
     }
     for mut f in features {
-        let mut props = properties(&f);
+        let props = &mut f.properties;
         let key = props.get(&layer_field).cloned().unwrap_or(Value::Null);
         let row = index.resolve(&key, level).ok().and_then(|(place, _)| by_place.get(&place).copied());
         if row.is_none() {
@@ -1039,7 +1220,6 @@ fn join(req: &mut Request) -> Result<Value, String> {
             };
             props.insert(field.clone(), value);
         }
-        f["properties"] = Value::Object(props);
         out_features.push(f);
     }
 
@@ -1066,8 +1246,8 @@ fn join(req: &mut Request) -> Result<Value, String> {
 
     let total = table.rows.len();
     let level_word = tr(req, level.word(), &[]);
-    let mut out = ToolOutput::new()
-        .layer(&format!("{layer_name} ({})", tr(req, "Joined", &[])), geojson::collection(out_features))
+    let mut out = Output::new()
+        .layer(&format!("{layer_name} ({})", tr(req, "Joined", &[])), out_features)
         .message(tr(
             req,
             "Level: {level}. Key field in the layer: {field}. Key column in the table: {column}.",
@@ -1123,15 +1303,15 @@ fn join(req: &mut Request) -> Result<Value, String> {
         let list = renamed.join(", ");
         out = out.message(tr(req, "Columns the layer already had a field of were renamed: {list}.", &[("list", &list)]));
     }
-    Ok(out.message(credit(req)).into())
+    Ok(out.message(credit(req)))
 }
 
 /// Assign Commune to Points.
-fn assign(req: &mut Request) -> Result<Value, String> {
+fn assign(req: &mut Request, layers: &mut Layers) -> Result<Output, String> {
     let points_name = req.str("points").unwrap_or("points").to_string();
-    let points = take_features(req, "points")?;
+    let points = take_features(layers, req, "points")?;
     let total = points.len();
-    let polygons = take_features(req, "communes")?;
+    let polygons = take_features(layers, req, "communes")?;
     let only = Level::from_param(req.str("level"));
     let index = Index::new();
     if polygons.is_empty() {
@@ -1141,15 +1321,13 @@ fn assign(req: &mut Request) -> Result<Value, String> {
     // picked for this layer, errs): the tool is run on any layer, the registry's smoke test among
     // them, and says why nothing came of it.
     let Some((field, level)) = layer_key(req, &index, &polygons, req.str("key"), only)? else {
-        return Ok(ToolOutput::new()
-            .message(tr(req, "The layer has no field of CUT codes or names: name it in the key field.", &[]))
-            .into());
+        return Ok(Output::new().message(tr(req, "The layer has no field of CUT codes or names: name it in the key field.", &[])));
     };
     // Each polygon with its place.
     let mut places: Vec<(Rings, Place)> = Vec::with_capacity(polygons.len());
     for f in &polygons {
-        let key = f.get("properties").and_then(|p| p.get(&field)).unwrap_or(&Value::Null);
-        if let (Ok((place, _)), Some(rings)) = (index.resolve(key, level), f.get("geometry").and_then(Rings::of)) {
+        let key = f.properties.get(&field).unwrap_or(&Value::Null);
+        if let (Ok((place, _)), Some(rings)) = (index.resolve(key, level), f.geometry().as_ref().and_then(Rings::of)) {
             places.push((rings, place));
         }
     }
@@ -1160,8 +1338,8 @@ fn assign(req: &mut Request) -> Result<Value, String> {
     let (rings, codes): (Vec<Rings>, Vec<Place>) = places.into_iter().unzip();
     let grid = Grid::new(&rings);
     for mut f in points {
-        let mut props = properties(&f);
-        let p = f.get("geometry").and_then(position);
+        let p = f.geometry().as_ref().and_then(position);
+        let props = &mut f.properties;
         let hit = match (p, &grid) {
             (Some(p), Some(grid)) => {
                 any_overlap |= grid.covers(p);
@@ -1178,13 +1356,12 @@ fn assign(req: &mut Request) -> Result<Value, String> {
         };
         for k in fields {
             let v = new.iter().find(|(n, _)| n == k).map(|(_, v)| v.clone()).unwrap_or(Value::Null);
-            write_field(&mut props, k, v, false);
+            write_field(props, k, v, false);
         }
-        f["properties"] = Value::Object(props);
         out_features.push(f);
     }
-    let mut out = ToolOutput::new()
-        .layer(&format!("{points_name} ({})", tr(req, "With commune", &[])), geojson::collection(out_features))
+    let mut out = Output::new()
+        .layer(&format!("{points_name} ({})", tr(req, "With commune", &[])), out_features)
         .message(tr(req, "Level: {level}. Key field: {field}.", &[("level", &tr(req, level.word(), &[])), ("field", &field)]))
         .message(tr(
             req,
@@ -1194,13 +1371,13 @@ fn assign(req: &mut Request) -> Result<Value, String> {
     if inside == 0 && total > 0 && !any_overlap {
         out = out.message(tr(req, "The points and the polygons don't overlap: are they in the same coordinate system?", &[]));
     }
-    Ok(out.message(credit(req)).into())
+    Ok(out.message(credit(req)))
 }
 
 /// Complete CUT.
-fn complete(req: &mut Request) -> Result<Value, String> {
+fn complete(req: &mut Request, layers: &mut Layers) -> Result<Output, String> {
     let layer_name = req.str("layer").unwrap_or("layer").to_string();
-    let features = take_features(req, "layer")?;
+    let features = take_features(layers, req, "layer")?;
     let total = features.len();
     let only = Level::from_param(req.str("level"));
     let index = Index::new();
@@ -1210,15 +1387,13 @@ fn complete(req: &mut Request) -> Result<Value, String> {
     }
     // As in `assign`: no key, a message rather than an error.
     let Some((field, level)) = layer_key(req, &index, &features, req.str("key"), only)? else {
-        return Ok(ToolOutput::new()
-            .message(tr(req, "The layer has no field of CUT codes or names: name it in the key field.", &[]))
-            .into());
+        return Ok(Output::new().message(tr(req, "The layer has no field of CUT codes or names: name it in the key field.", &[])));
     };
     let fields = Place::field_names(level);
     let mut out_features = Vec::with_capacity(features.len());
     let (mut matched, mut old_codes, mut aliases) = (0, 0, 0);
     for mut f in features {
-        let mut props = properties(&f);
+        let props = &mut f.properties;
         let key = props.get(&field).cloned().unwrap_or(Value::Null);
         let mut note = Value::Null;
         let mut new: Vec<(&str, Value)> = Vec::new();
@@ -1239,14 +1414,13 @@ fn complete(req: &mut Request) -> Result<Value, String> {
         }
         for k in fields {
             let v = new.iter().find(|(n, _)| n == k).map(|(_, v)| v.clone()).unwrap_or(Value::Null);
-            write_field(&mut props, k, v, *k == field);
+            write_field(props, k, v, *k == field);
         }
         props.insert("CUT_NOTA".to_string(), note);
-        f["properties"] = Value::Object(props);
         out_features.push(f);
     }
-    let mut out = ToolOutput::new()
-        .layer(&format!("{layer_name} ({})", tr(req, "Completed", &[])), geojson::collection(out_features))
+    let mut out = Output::new()
+        .layer(&format!("{layer_name} ({})", tr(req, "Completed", &[])), out_features)
         .message(tr(req, "Level: {level}. Key field: {field}.", &[("level", &tr(req, level.word(), &[])), ("field", &field)]))
         .message(tr(
             req,
@@ -1259,7 +1433,7 @@ fn complete(req: &mut Request) -> Result<Value, String> {
     if aliases > 0 {
         out = out.message(tr(req, "{n} names matched by another spelling.", &[("n", &aliases.to_string())]));
     }
-    Ok(out.message(credit(req)).into())
+    Ok(out.message(credit(req)))
 }
 
 #[cfg(test)]
@@ -1510,25 +1684,40 @@ mod tests {
         assert_eq!(position(&json!({"type": "MultiPoint", "coordinates": [[1, 2], [3, 4]]})), Some([1.0, 2.0]));
     }
 
-    fn request(id: &str, params: Value, layers: &[(&str, Value)], files: &[(&str, &str, &[u8])]) -> Request {
-        let mut layers_map = Map::new();
+    /// A tool request as a test writes it: the request and its layers, read as RustGIS's text.
+    struct TestRequest {
+        lang: String,
+        req: Request,
+        layers: Layers,
+    }
+
+    fn request(id: &str, params: Value, layers: &[(&str, Value)], files: &[(&str, &str, &[u8])]) -> TestRequest {
+        let mut raw = Layers::new();
         for (name, fc) in layers {
-            layers_map.insert(name.to_string(), fc.clone());
+            raw.insert(name.to_string(), serde_json::from_str(&fc.to_string()).unwrap());
         }
         let mut files_map = Map::new();
         for (param, name, bytes) in files {
             files_map.insert(param.to_string(), json!({"name": name, "data": base64(bytes)}));
         }
-        Request {
-            kind: rustgis_plugin::Kind::Tool,
+        let req = Request {
+            kind: Kind::Tool,
             id: id.to_string(),
             params,
-            layers: layers_map,
+            layers: Map::new(),
             files: files_map,
             lang: "es".to_string(),
             panel: Map::new(),
             panel_changed: Vec::new(),
-        }
+        };
+        TestRequest { lang: "es".to_string(), req, layers: raw }
+    }
+
+    /// Runs the tool and reads its output as RustGIS would: through [`Output::to_json`].
+    fn run(t: &mut TestRequest) -> Result<Value, String> {
+        t.req.lang = t.lang.clone();
+        let out = super::run(&mut t.req, std::mem::take(&mut t.layers))?;
+        Ok(serde_json::from_str(&out.to_json()).unwrap())
     }
 
     fn base64(bytes: &[u8]) -> String {

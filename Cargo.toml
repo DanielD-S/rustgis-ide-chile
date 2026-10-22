@@ -1,6 +1,6 @@
 [package]
 name = "ide-chile"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2024"
 license = "MIT"
 repository = "https://github.com/DanielD-S/rustgis-ide-chile"
@@ -14,6 +14,10 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 rustgis-plugin = { git = "https://github.com/opengeos/rustgis-plugins" }
+# The CUT tools read a request themselves, keeping each feature's geometry as the JSON text it
+# came as (serde_json's RawValue), so a layer's coordinates are copied through, never parsed.
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["raw_value"] }
 
 # Small, fast plugin modules. A panic aborts: RustGIS reports it as the plugin failing.
 [profile.release]

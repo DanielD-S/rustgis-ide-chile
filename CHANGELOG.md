@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.1 (2026-10-22)
+
+- The Census 2024 regions, provinces and communes come with their geometry: the INE's boundary
+  service answered the 10 m generalisation the plugin asked for (since 0.2.0) with no geometry for
+  all but two features, so these layers now ask for the coarsest level that keeps them whole
+  (about 500 m for the communes, 2 km for provinces and regions). Smaller downloads too: 17, 3
+  and 2 MB.
+- The CUT tools work on big layers: they keep each feature's geometry as the text it came as
+  instead of parsing and rewriting its coordinates, which ran Join and Complete out of RustGIS's
+  instruction budget on the 25 MB communes layer.
+
 ## 0.3.0 (2026-10-22)
 
 - The CUT tools, in the Tools pane under Plugins › IDE Chile and on the tab's CUT group: **Join
