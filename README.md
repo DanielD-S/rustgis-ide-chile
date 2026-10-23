@@ -76,7 +76,7 @@ falls back to the map image where there is one and otherwise gives the address t
   Images** removes them all.
 
 ```sh
-rustgis-cli run --plugin ide-chile-0.3.0.rgplugin   --cmd 'map.goToXY={"x":-70.65,"y":-33.45}' --cmd 'map.setScale={"scale":300000}'   --cmd 'plugin:ide-chile/communes'   --cmd 'plugin:ide-chile/soils'   --cmd 'plugin:ide-chile/census-2024-communes'   --cmd 'plugin:ide-chile/regions={"map":true}'   --cmd 'share.exportMap={"path":"santiago.png"}'
+rustgis-cli run --plugin ide-chile-0.4.0.rgplugin   --cmd 'map.goToXY={"x":-70.65,"y":-33.45}' --cmd 'map.setScale={"scale":300000}'   --cmd 'plugin:ide-chile/communes'   --cmd 'plugin:ide-chile/soils'   --cmd 'plugin:ide-chile/census-2024-communes'   --cmd 'plugin:ide-chile/regions={"map":true}'   --cmd 'share.exportMap={"path":"santiago.png"}'
 ```
 
 ## The CUT tools
@@ -136,7 +136,7 @@ in [`communes.json`](communes.json) with its source, layer and the day it was re
 run's last message says. On the command line:
 
 ```sh
-rustgis-cli run --plugin ide-chile-0.3.0.rgplugin   --cmd 'plugin:ide-chile/census-2024-communes'   --cmd 'gp.run={"tool":"plugin:ide-chile/join-cut","params":{"layer":"Censo 2024: comunas","table":"sinim_2024.csv"}}'   --cmd 'share.exportMap={"path":"ingresos.png"}'
+rustgis-cli run --plugin ide-chile-0.4.0.rgplugin   --cmd 'plugin:ide-chile/census-2024-communes'   --cmd 'gp.run={"tool":"plugin:ide-chile/join-cut","params":{"layer":"Censo 2024: comunas","table":"sinim_2024.csv"}}'   --cmd 'share.exportMap={"path":"ingresos.png"}'
 ```
 
 ## Sources and terms
