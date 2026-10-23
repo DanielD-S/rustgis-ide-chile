@@ -1279,6 +1279,39 @@ pub const RECORDS: &[Record] = &[
         ],
     },
     Record {
+        entry: "mining-concessions",
+        sub: None,
+        source: "arcgis",
+        elements: &[
+            ("MD_Metadata.fileIdentifier", "8379a198129b4626a5b3bb51dbdc1ec1"),
+            ("MD_Metadata.dateStamp", "2026-05-20"),
+            ("MD_Metadata.contact", "SERNAGEOMIN, Departamento de Propiedad Minera (catastro minero)"),
+            (
+                "MD_Metadata.metadataStandardName",
+                "ISO 19115, elementos tomados del servicio ArcGIS REST (sin registro en el catálogo IDE Chile)",
+            ),
+            ("CI_Citation.title", "WGS84"),
+            ("CI_Citation.date.creation", "2026-05-20"),
+            ("CI_Citation.date.revision", "2026-05-20"),
+            (
+                "MD_DataIdentification.abstract",
+                "Catastro geoespacial de concesiones mineras vigentes y no vigentes en Chile de exploración y explotación. Las concesiones están identificadas con cada uno de sus vértices y contienen información como: Identificación de la concesión Número de rol y dígito verificador Nombre de la concesión Características generales Superficie en hectáreas Información legal Tipo de concesión Situación actual Datos de inscripción (número, fojas y año) Origen del registro Vigencia Fecha de vencimiento Ubicación Comuna asociada Sistema de referencia (datum y huso) Titularidad Nombre del titular RUT y dígito verificador División asociada Clasificación específica Condición de estacamento salitrero Información espacial Área y longitud de la geometría (calculadas automáticamente) Fechas de referencia Fecha de creación Fecha de última actualización",
+            ),
+            (
+                "MD_DataIdentification.pointOfContact",
+                "SERNAGEOMIN – Departamento de Planificación (Subdepartamento de Inteligencia de Datos) y Departamento de Propiedad Minera (pointOfContact)",
+            ),
+            ("MD_ReferenceSystem.referenceSystemIdentifier", "EPSG:4326"),
+            ("EX_GeographicBoundingBox", "W -180.0000, E 180.0000, S -83.5743, N 90.0000"),
+            (
+                "MD_LegalConstraints.otherConstraints",
+                "Términos de uso La información contenida en esta capa está destinada exclusivamente a fines de consulta, visualización y análisis referencial. Uso permitido Visualización de datos geográficos y atributos asociados Análisis exploratorio y generación de insumos referenciales Apoyo a estudios técnicos o académicos Restricciones No se permite la modificación, edición ni alteración de los datos No se autoriza su uso como fuente oficial para fines legales o administrativos No se garantiza su idoneidad para procesos de toma de decisiones críticas sin validación adicional Responsabilidad La información se entrega “tal cual” (as is), sin garantías explícitas o implícitas El responsable de la capa no asegura la actualización en tiempo real ni la ausencia de errores El uso de los datos es responsabilidad exclusiva del usuario Distribución Se permite compartir la información, siempre que se cite la fuente correspondiente No se debe redistribuir como producto oficial sin autorización Actualización Los datos pueden ser actualizados periódicamente sin previo aviso",
+            ),
+            ("CI_OnlineResource.linkage", "https://services1.arcgis.com/OyjvVdFTl5hfSdX3/arcgis/rest/services/WGS84/FeatureServer/2"),
+            ("CI_OnlineResource.linkage", "https://www.arcgis.com/home/item.html?id=8379a198129b4626a5b3bb51dbdc1ec1"),
+        ],
+    },
+    Record {
         entry: "energy",
         sub: Some(1),
         source: "csw",

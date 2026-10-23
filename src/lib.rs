@@ -57,6 +57,12 @@ pub struct Entry {
     /// 10 m for most, coarser for the INE's Census 2024 boundaries, whose service answers finer
     /// requests with no geometry (see `generate.py`).
     pub offset: f64,
+    /// An ArcGIS layer's `where` clause (empty: every feature), such as the concessions in force.
+    pub filter: &'static str,
+    /// The fields an ArcGIS layer is read with, comma-separated (empty: all of them).
+    pub fields: &'static str,
+    /// The smallest map scale (largest denominator) the layer is read in the map view at.
+    pub max_scale: f64,
 }
 
 /// One queryable layer of an ArcGIS service.
@@ -67,6 +73,8 @@ pub struct Sub {
     /// Its extent in Web Mercator `[west, south, east, north]`, when the service gave one the
     /// plugin could read; without it the layer is always considered.
     pub bbox: Option<[f64; 4]>,
+    /// The most features its server gives to one request (`maxRecordCount`).
+    pub max: u32,
 }
 
 /// The most features one read in the map view brings (ArcGIS servers stop at 2,000 anyway).
@@ -74,10 +82,6 @@ const IN_VIEW: u32 = 5000;
 
 /// The most of a service's layers one command reads in the map view.
 const MAX_SUBS: usize = 8;
-
-/// The smallest map scale (the largest denominator) a layer is read in the map view at: farther
-/// out, the box would ask a national layer for most of itself.
-const MAX_VIEW_SCALE: f64 = 2_000_000.0;
 
 /// Runs a command (a tool goes to `cut::run`, with its layers).
 pub(crate) fn handle(req: Request) -> Result<Value, String> {
@@ -88,7 +92,6 @@ pub(crate) fn handle(req: Request) -> Result<Value, String> {
         return choose(&req, e, req.bool("map").unwrap_or(false));
     }
     match req.id.as_str() {
-        "clear" => clear(&req),
         "about" => about(&req),
         other => Err(format!("IDE Chile has no command '{other}'")),
     }
@@ -170,8 +173,15 @@ fn overlaps(a: [f64; 4], b: [f64; 4]) -> bool {
 /// The address of an ArcGIS layer's features as GeoJSON: the whole layer, or, given the view,
 /// the features in it, generalised to about a pixel.
 pub fn arcgis_url(e: &Entry, sub: &Sub, view: Option<View>) -> String {
-    let mut u =
-        format!("{}/{}/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&geometryPrecision=5&f=geojson", e.service, sub.id);
+    let filter = if e.filter.is_empty() { "1=1" } else { e.filter };
+    let fields = if e.fields.is_empty() { "*" } else { e.fields };
+    let mut u = format!(
+        "{}/{}/query?where={}&outFields={}&returnGeometry=true&outSR=4326&geometryPrecision=5&f=geojson",
+        e.service,
+        sub.id,
+        encode(filter),
+        encode(fields)
+    );
     match view {
         Some(v) => {
             let [w, s, e, n] = v.bbox;
@@ -186,6 +196,33 @@ pub fn arcgis_url(e: &Entry, sub: &Sub, view: Option<View>) -> String {
         None => u.push_str(&format!("&maxAllowableOffset={}", e.offset)),
     }
     u
+}
+
+/// A query value percent-encoded: letters, digits and `-_.~` stay, everything else is `%XX`.
+fn encode(s: &str) -> String {
+    s.bytes()
+        .map(|b| if b.is_ascii_alphanumeric() || b"-_.~".contains(&b) { (b as char).to_string() } else { format!("%{b:02X}") })
+        .collect()
+}
+
+/// A map scale's denominator as people write it: `100,000` in English, `100.000` in Spanish.
+fn scale_text(scale: f64, lang: &str) -> String {
+    let digits = format!("{:.0}", scale);
+    let sep = if lang.starts_with("es") { '.' } else { ',' };
+    let mut out = String::new();
+    for (i, c) in digits.chars().enumerate() {
+        if i > 0 && (digits.len() - i).is_multiple_of(3) {
+            out.push(sep);
+        }
+        out.push(c);
+    }
+    out
+}
+
+/// The most features one read of a layer can bring: its server's limit, or the plugin's.
+pub fn read_limit(e: &Entry, layer_name: &str) -> u32 {
+    let sub = e.subs.iter().find(|s| layer_name.ends_with(s.name)).or(e.subs.first());
+    sub.map_or(IN_VIEW, |s| s.max.min(IN_VIEW))
 }
 
 /// The address of a WFS feature type's features as GeoJSON: the whole layer, or, given the
@@ -231,8 +268,12 @@ fn choose(req: &Request, e: &Entry, map: bool) -> Result<Value, String> {
         None
     } else {
         let view = host::view()?;
-        if view.get("scale").and_then(|s| s.as_f64()).is_none_or(|s| s > MAX_VIEW_SCALE) {
-            return Err(req.tr(MANIFEST, "{name} is read in the map view: zoom in to 1:2,000,000 or closer first.", name));
+        if view.get("scale").and_then(|s| s.as_f64()).is_none_or(|s| s > e.max_scale) {
+            return Err(req.tr(
+                MANIFEST,
+                "{name} is read in the map view: zoom in to 1:{scale} or closer first.",
+                &[("name", e.name), ("scale", &scale_text(e.max_scale, &req.lang))],
+            ));
         }
         Some(view_of(&view).ok_or("the map has no view to read the features in")?)
     };
@@ -242,10 +283,16 @@ fn choose(req: &Request, e: &Entry, map: bool) -> Result<Value, String> {
     }
     let mut added = Vec::new();
     let mut pending = false;
+    // Reads the server cut short: their layer's name and the limit they hit.
+    let mut cut = Vec::new();
     for (layer, url) in &reads {
         match host::run("layer.addUrl", json!({"url": url, "name": layer, "zoom": e.whole})) {
             Ok(out) => {
                 pending |= out.get("pending").and_then(Value::as_bool) == Some(true);
+                let limit = read_limit(e, layer);
+                if view.is_some() && out.get("features").and_then(Value::as_u64).is_some_and(|n| n >= u64::from(limit)) {
+                    cut.push((layer.clone(), limit));
+                }
                 added.push(out);
             }
             // A RustGIS that can't add data by address from a command: 0.2.0, which has no
@@ -293,7 +340,14 @@ fn choose(req: &Request, e: &Entry, map: bool) -> Result<Value, String> {
         },
         &[("name", e.name), ("n", &n)],
     ));
-    Ok(json!({"layers": added, "pending": pending}))
+    for (layer, limit) in &cut {
+        host::notify(&req.tr(
+            MANIFEST,
+            "{name}: the map view holds more than the {n} features the service gives at once, so the layer is incomplete. Zoom in and choose it again.",
+            &[("name", layer), ("n", &limit.to_string())],
+        ));
+    }
+    Ok(json!({"layers": added, "pending": pending, "incomplete": cut.iter().map(|(l, _)| l.clone()).collect::<Vec<_>>()}))
 }
 
 /// Adds an entry's map image (a web tile layer, drawn under the map's own layers), or takes it
@@ -309,23 +363,6 @@ fn toggle_tiles(req: &Request, e: &Entry) -> Result<Value, String> {
     let out = host::run("map.addTiles", tiles_params(e))?;
     host::notify(&req.tr(MANIFEST, "Added {name} (map image, under the layers; Map › Basemap lists it).", name));
     Ok(out)
-}
-
-/// Removes the plugin's map images, bottom first so the indexes stay valid.
-fn clear(req: &Request) -> Result<Value, String> {
-    let mut removed = Vec::new();
-    for t in tile_layers()?.iter().rev() {
-        if t["id"].as_str().is_some_and(|id| id.starts_with("ide-chile-")) {
-            host::run("map.removeTiles", json!({"index": t["index"]}))?;
-            removed.push(t["name"].clone());
-        }
-    }
-    host::notify(&if removed.is_empty() {
-        req.tr(MANIFEST, "No IDE Chile map layers to remove.", &[])
-    } else {
-        req.tr(MANIFEST, "Removed {n} IDE Chile layers.", &[("n", &removed.len().to_string())])
-    });
-    Ok(json!({"removed": removed}))
 }
 
 fn about(req: &Request) -> Result<Value, String> {
@@ -374,7 +411,7 @@ mod tests {
             }
         }
         for c in commands {
-            assert!(CATALOG.iter().any(|e| e.id == c) || ["clear", "about"].contains(&c), "{c} isn't handled");
+            assert!(CATALOG.iter().any(|e| e.id == c) || c == "about", "{c} isn't handled");
         }
         assert_eq!(manifest["permissions"], json!(["edit", "files", "network"]));
         assert_eq!(manifest["minRustgisVersion"], "0.3.0");
@@ -516,6 +553,36 @@ mod tests {
         let r = reads(communes, Some(santiago()));
         assert_eq!(r.len(), 1, "{r:?}");
         assert!(r[0].1.contains("/MapServer/9/query?"), "{}", r[0].1);
+    }
+
+    #[test]
+    fn concessions_are_read_filtered_and_close() {
+        let c = CATALOG.iter().find(|e| e.id == "mining-concessions").unwrap();
+        assert!(!c.whole && c.tiles.is_empty());
+        assert_eq!(c.max_scale, 100_000.0);
+        let v = view_of(&json!({"center": [-70.3, -27.4], "scale": 100000.0})).unwrap();
+        let r = reads(c, Some(v));
+        assert_eq!(r.len(), 1);
+        assert_eq!(r[0].0, "Concesiones mineras vigentes (SERNAGEOMIN)");
+        assert!(
+            r[0].1.contains(
+                "/WGS84/FeatureServer/2/query?where=SITUACION_CONCESION%20%3C%3E%20%27ELIMINADA%27&outFields=NUMERO_ROL%2CDV_ROL%2CNOMBRE"
+            ),
+            "{}",
+            r[0].1
+        );
+        assert!(!r[0].1.contains("TITULAR_RUT"), "the holder's RUT is left out");
+        assert_eq!(read_limit(c, &r[0].0), 2000);
+        // Every other layer: all its features and fields, and the usual scale.
+        let soils = CATALOG.iter().find(|e| e.id == "soils").unwrap();
+        assert!(reads(soils, Some(santiago()))[0].1.contains("query?where=1%3D1&outFields=%2A&"));
+        assert_eq!(soils.max_scale, 2_000_000.0);
+        // The DGA's hydrometric network gives 1,000 to a request.
+        let h = CATALOG.iter().find(|e| e.id == "hydrometric-network").unwrap();
+        assert_eq!(read_limit(h, h.name), 1000);
+        assert_eq!(scale_text(100_000.0, "es"), "100.000");
+        assert_eq!(scale_text(2_000_000.0, "en"), "2,000,000");
+        assert_eq!(encode("a b<>'c'"), "a%20b%3C%3E%27c%27");
     }
 
     #[test]

@@ -1,7 +1,7 @@
 {
   "id": "ide-chile",
   "name": "IDE Chile",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, the INE's Censuses 2024 and 2017, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names; Layer Metadata shows each layer's ISO 19115 record from the IDE Chile catalogue.",
   "author": "Daniel Díaz",
   "homepage": "https://github.com/DanielD-S/rustgis-ide-chile",
@@ -317,6 +317,13 @@
       "params": "{\"map\"?: bool (the service's own map image as a web tile layer under the layers, instead of the features)}"
     },
     {
+      "id": "mining-concessions",
+      "label": "Mining Concessions",
+      "help": "SERNAGEOMIN's mining cadastre: the exploration and exploitation concessions in force (constituted or in process), with their roll number, name, hectares, holder and expiry; eliminated ones are left out. For consultation only: the Conservador de Minas' registry is the legal record. Read in the map view at 1:100,000 or closer, up to 2,000 at a time.",
+      "icon": "polygon_layer",
+      "params": "{\"map\"?: bool (the service's own map image as a web tile layer under the layers, instead of the features)}"
+    },
+    {
       "id": "energy",
       "label": "Energy",
       "help": "Power plants (solar, wind, hydro, thermal, bioenergy, geothermal), substations and transmission lines (Ministry of Energy). Read in the map view.",
@@ -448,13 +455,6 @@
       "help": "The Sendero de Chile trail (MMA).",
       "icon": "line_layer",
       "params": "{\"map\"?: bool (the service's own map image as a web tile layer under the layers, instead of the features)}"
-    },
-    {
-      "id": "clear",
-      "label": "Clear Map Images",
-      "help": "Removes the IDE Chile map images (web tile layers) from the map.",
-      "icon": "delete",
-      "params": "{}"
     },
     {
       "id": "about",
@@ -657,6 +657,7 @@
             "Censo 2017: caseríos",
             "Instalaciones mineras (SERNAGEOMIN)",
             "Catastro de relaves 2025 (SERNAGEOMIN)",
+            "Concesiones mineras vigentes (SERNAGEOMIN)",
             "Energía (Ministerio de Energía)",
             "Riesgo volcánico 2023 (SERNAGEOMIN)",
             "Áreas protegidas (SBAP)",
@@ -716,8 +717,9 @@
           {
             "menu": "Mining & Energy",
             "icon": "point_layer",
-            "help": "Mining installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).",
+            "help": "Mining concessions, installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).",
             "items": [
+              "mining-concessions",
               "mining-installations",
               "tailings",
               "energy"
@@ -840,7 +842,6 @@
         "label": "Manage",
         "items": [
           "tool:layer-metadata",
-          "clear",
           "about"
         ]
       }
@@ -929,6 +930,8 @@
       "Mining installations registered by SERNAGEOMIN: mines, plants, tailings, waste dumps and more, with their company and operation. Read in the map view, up to 2,000 at a time.": "Instalaciones mineras catastradas por SERNAGEOMIN: minas, plantas, relaves, botaderos y otras, con su empresa y faena. Se lee en la vista del mapa, hasta 2.000 por vez.",
       "Tailings Deposits 2025": "Catastro de relaves 2025",
       "The 2025 cadastre of mine tailings deposits (SERNAGEOMIN): active, inactive and abandoned, with their company, resource and volume.": "Catastro de depósitos de relaves 2025 (SERNAGEOMIN): activos, inactivos y abandonados, con su empresa, recurso y volumen.",
+      "Mining Concessions": "Concesiones mineras",
+      "SERNAGEOMIN's mining cadastre: the exploration and exploitation concessions in force (constituted or in process), with their roll number, name, hectares, holder and expiry; eliminated ones are left out. For consultation only: the Conservador de Minas' registry is the legal record. Read in the map view at 1:100,000 or closer, up to 2,000 at a time.": "Catastro minero de SERNAGEOMIN: las concesiones de exploración y explotación vigentes (constituidas o en trámite), con su rol, nombre, hectáreas, titular y vencimiento; las eliminadas quedan fuera. Solo para consulta: el registro legal es el del Conservador de Minas. Se lee en la vista del mapa a 1:100.000 o más cerca, hasta 2.000 por vez.",
       "Energy": "Energía",
       "Power plants (solar, wind, hydro, thermal, bioenergy, geothermal), substations and transmission lines (Ministry of Energy). Read in the map view.": "Centrales de generación (solares, eólicas, hidroeléctricas, termoeléctricas, de bioenergía y geotérmicas), subestaciones y líneas de transmisión (Ministerio de Energía). Se lee en la vista del mapa.",
       "Volcanic Risk 2023": "Riesgo volcánico 2023",
@@ -967,8 +970,6 @@
       "Sports facilities (Ministry of Sport). Read in the map view.": "Infraestructura deportiva (Ministerio del Deporte). Se lee en la vista del mapa.",
       "Sendero de Chile": "Sendero de Chile",
       "The Sendero de Chile trail (MMA).": "Sendero de Chile (MMA).",
-      "Clear Map Images": "Quitar imágenes de mapa",
-      "Removes the IDE Chile map images (web tile layers) from the map.": "Quita del mapa las imágenes de mapa (capas de teselas) de IDE Chile.",
       "About IDE Chile": "Acerca de IDE Chile",
       "The sources behind the layers.": "Las fuentes de las capas.",
       "IDE Chile": "IDE Chile",
@@ -981,13 +982,12 @@
       "Added {name}.": "Añadida {name}.",
       "Added {name} in the map view.": "Añadida {name} en la vista del mapa.",
       "Downloading {name}; it is added when it lands.": "Descargando {name}; se añade cuando termine.",
-      "{name} is read in the map view: zoom in to 1:2,000,000 or closer first.": "{name} se lee en la vista del mapa: acerque primero a 1:2.000.000 o más cerca.",
+      "{name} is read in the map view: zoom in to 1:{scale} or closer first.": "{name} se lee en la vista del mapa: acerque primero a 1:{scale} o más cerca.",
+      "{name}: the map view holds more than the {n} features the service gives at once, so the layer is incomplete. Zoom in and choose it again.": "{name}: la vista del mapa tiene más de las {n} entidades que el servicio entrega por vez, así que la capa está incompleta. Acerque el mapa y vuelva a elegirla.",
       "Removed {name}.": "Quitada {name}.",
       "{name} has no map image.": "{name} no tiene imagen de mapa.",
       "Added {n} layers of {name} in the map view.": "Añadidas {n} capas de {name} en la vista del mapa.",
       "Nothing of {name} reaches the map view.": "Nada de {name} llega a la vista del mapa.",
-      "Removed {n} IDE Chile layers.": "Quitadas {n} capas de IDE Chile.",
-      "No IDE Chile map layers to remove.": "No hay capas de mapa de IDE Chile que quitar.",
       "IDE Chile: {n} layers from Geoportal de Chile, IDE MINAGRI, IDE MINVU, INE, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Each layer's credit names its source; Layer Metadata shows its ISO 19115 record.": "IDE Chile: {n} capas del Geoportal de Chile, IDE MINAGRI, IDE MINVU, INE, SERNAGEOMIN, SBAP, DGA y el Ministerio de Energía. El crédito de cada capa nombra su fuente; Metadatos de la capa muestra su registro ISO 19115.",
       "Join Table by CUT": "Unir tabla por CUT",
       "Joins a CSV table to communes, provinces or regions by their código único territorial (CUT) or their name: codes with or without the leading zero, names however they are spelt, and the codes of before Ñuble (2018) and Arica y Parinacota and Los Ríos (2007). The table may be semicolon-separated and in Windows-1252, with decimal commas.": "Une una tabla CSV a comunas, provincias o regiones por su código único territorial (CUT) o por su nombre: códigos con o sin el cero inicial, nombres como vengan escritos, y los códigos de antes de Ñuble (2018) y de Arica y Parinacota y Los Ríos (2007). La tabla puede venir separada por punto y coma, en Windows-1252 y con decimales con coma.",
@@ -1059,6 +1059,7 @@
       "Censo 2017: caseríos": "Censo 2017: caseríos",
       "Instalaciones mineras (SERNAGEOMIN)": "Instalaciones mineras (SERNAGEOMIN)",
       "Catastro de relaves 2025 (SERNAGEOMIN)": "Catastro de relaves 2025 (SERNAGEOMIN)",
+      "Concesiones mineras vigentes (SERNAGEOMIN)": "Concesiones mineras vigentes (SERNAGEOMIN)",
       "Energía (Ministerio de Energía)": "Energía (Ministerio de Energía)",
       "Riesgo volcánico 2023 (SERNAGEOMIN)": "Riesgo volcánico 2023 (SERNAGEOMIN)",
       "Áreas protegidas (SBAP)": "Áreas protegidas (SBAP)",
@@ -1155,7 +1156,7 @@
       "Soils & Agriculture": "Suelos y agricultura",
       "Soils, land use, properties, irrigation and crops (IDE MINAGRI).": "Suelos, uso de la tierra, propiedades, riego y cultivos (IDE MINAGRI).",
       "Mining & Energy": "Minería y energía",
-      "Mining installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).": "Instalaciones mineras, relaves e infraestructura energética (SERNAGEOMIN, Ministerio de Energía).",
+      "Mining concessions, installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).": "Concesiones e instalaciones mineras, relaves e infraestructura energética (SERNAGEOMIN, Ministerio de Energía).",
       "Environment": "Medio ambiente",
       "Environment & Hazards": "Medio ambiente y riesgos",
       "Wildfires, volcanoes, protected areas, wetlands, water and climate.": "Incendios, volcanes, áreas protegidas, humedales, aguas y clima.",

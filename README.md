@@ -10,7 +10,7 @@ Public geospatial services of Chile as one-click layers for RustGIS: the
 [Ministry of Energy](https://ide-energia.minenergia.cl).
 
 Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning,
-census data, roads, schools, health and tourism: 62 layers in a ribbon tab of their own, each a
+census data, roads, schools, health and tourism: 63 layers in a ribbon tab of their own, each a
 command that scripts, the command line and the AI Assistant can run too. Three **CUT tools** join
 any table of Chile to its communes, provinces or regions by their código único territorial,
 however it is written, assign communes to points, and complete codes and names (see
@@ -24,8 +24,9 @@ however it is written, assign communes to points, and complete codes and names (
 - **Boundaries**: Regions, Communes (IDE MINAGRI)
 - **Resources**: **Soils & Agriculture ▾** (9): agrological soils, land use (CONAF), rural
   properties, irrigation, erosion, fruit cadastre, weather stations, summer pastures, hunting ban
-  areas; **Mining & Energy ▾** (3): SERNAGEOMIN's mining installations and 2025 tailings
-  cadastre, and the Ministry of Energy's power plants, substations and transmission lines
+  areas; **Mining & Energy ▾** (4): SERNAGEOMIN's mining concessions in force (the mining
+  cadastre), mining installations and 2025 tailings cadastre, and the Ministry of Energy's power
+  plants, substations and transmission lines
 - **Environment**: **Environment & Hazards ▾** (11): wildfires 2024–2025, SERNAGEOMIN's 2023
   volcanic risk ranking, the SBAP's protected areas, Ramsar wetlands, the MMA wetlands
   inventory, hydrography, basins, aquifer restrictions, the DGA's water scarcity decrees in force
@@ -41,7 +42,7 @@ however it is written, assign communes to points, and complete codes and names (
   attractions, street markets, sports facilities, Sendero de Chile (Geoportal de Chile)
 - **CUT**: Join Table by CUT, Assign Commune to Points, Complete CUT (geoprocessing tools, also
   in the Tools pane under Plugins › IDE Chile)
-- **Manage**: Layer Metadata (ISO 19115), Clear IDE Chile, About IDE Chile
+- **Manage**: Layer Metadata (ISO 19115), About IDE Chile
 
 The interface is in English with a full Spanish translation; layer names on the map are the
 datasets' own names.
@@ -72,8 +73,26 @@ falls back to the map image where there is one and otherwise gives the address t
 - Where the service also draws its own map image, `{"map": true}` adds that instead, as a web
   tile layer (an ArcGIS MapServer `export` request per 512-pixel tile, from zoom 4 up): like every
   web tile layer in RustGIS it is drawn under the map's own layers and listed under
-  **Map › Basemap**, not in the Layers pane; chosen again, it is taken away, and **Clear Map
-  Images** removes them all.
+  **Map › Basemap**, not in the Layers pane, where it can be taken away; chosen again, it is
+  taken away too.
+- A layer read in the map view brings at most what its server gives to one request (2,000 for
+  most ArcGIS services, 1,000 for the DGA's hydrometric network). When the view holds more, the
+  plugin says the layer is incomplete: zoom in and choose it again.
+
+### The mining cadastre
+
+**Mining Concessions** reads SERNAGEOMIN's mining cadastre (its Departamento de Propiedad
+Minera's concessions layer): the exploration and exploitation concessions in force, constituted
+or in process, about 105,000 of the 594,000 the layer holds; the eliminated ones are left out
+(`SITUACION_CONCESION <> 'ELIMINADA'`). Each comes with its roll number, name, type, situation,
+hectares, expiry, holder's name, registration (number, folio, year) and commune. The holder's RUT
+isn't read: for a natural person it is personal data, and the name identifies the holder.
+
+A mining district holds tens of thousands of concessions in a view at 1:1,000,000 (about 20,000
+around Antofagasta, 17,000 around Copiapó, checked on 2026-10-23) and the service gives 2,000 to
+a request, so the layer is read at 1:100,000 or closer, where those views hold about 600 and
+1,200. SERNAGEOMIN publishes it for consultation and visualisation only: the legal record of a
+concession is the Conservador de Minas' registry.
 
 ```sh
 rustgis-cli run --plugin ide-chile-0.4.0.rgplugin   --cmd 'map.goToXY={"x":-70.65,"y":-33.45}' --cmd 'map.setScale={"scale":300000}'   --cmd 'plugin:ide-chile/communes'   --cmd 'plugin:ide-chile/soils'   --cmd 'plugin:ide-chile/census-2024-communes'   --cmd 'plugin:ide-chile/regions={"map":true}'   --cmd 'share.exportMap={"path":"santiago.png"}'
@@ -150,7 +169,7 @@ its credit, and the data stays under its publisher's terms:
 | [IDE MINVU](https://ide.minvu.cl) | ArcGIS Server (`geoide.minvu.cl`) | urban limits, risk areas, heritage, urban wetlands, settlements, parks, housing deficit, bike lanes |
 | [INE](https://geoine-ine-chile.opendata.arcgis.com) | ArcGIS Online feature services | Census 2024, Census 2017 |
 | [Geoportal de Chile](https://www.geoportal.cl) | GeoServer WFS (`geoportal.cl/geoserver`) | wetlands (MMA), hydrography, basins, aquifers, climate zones, roads, railways, airports, schools, health, police, municipalities, capitals, tourism, street markets, sports, Sendero de Chile |
-| [SERNAGEOMIN](https://www.sernageomin.cl) | ArcGIS Online feature services | mining installations, tailings cadastre 2025, volcanic risk ranking 2023 |
+| [SERNAGEOMIN](https://www.sernageomin.cl) | ArcGIS Online feature services | mining concessions (mining cadastre), mining installations, tailings cadastre 2025, volcanic risk ranking 2023 |
 | [SBAP](https://sbap.gob.cl) | ArcGIS Online feature service (Sistema de Información de la Biodiversidad) | protected areas |
 | [DGA](https://dga.mop.gob.cl) | ArcGIS Online feature services | water scarcity decrees in force, hydrometric network 2026 |
 | [Ministry of Energy](https://ide-energia.minenergia.cl) | ArcGIS Server (`ide-energia.minenergia.cl`) | power plants, substations, transmission lines |

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.0 (2026-10-23)
+
+- **Mining Concessions**: SERNAGEOMIN's mining cadastre, the exploration and exploitation
+  concessions in force (constituted or in process; eliminated ones are left out), with roll,
+  name, type, hectares, expiry, holder's name, registration and commune; the holder's RUT isn't
+  read. Read in the map view at 1:100,000 or closer: a mining district holds tens of thousands
+  of concessions at 1:1,000,000, and the service gives 2,000 to a request.
+- A layer read in the map view says when its server cut the read short (the view held more than
+  the service gives at once), instead of adding a partial layer in silence.
+- Each layer can have its own filter, fields and closest scale (`filter`, `fields`, `max_scale`
+  in `generate.py`).
+- **Clear Map Images** goes, making room for the concessions within RustGIS's 64 commands: a map
+  image is taken away by choosing it again, or from **Map › Basemap**.
+
 ## 0.4.0 (2026-10-23)
 
 - Seven layers of mining, water, protected areas and energy, found through the IDE Chile

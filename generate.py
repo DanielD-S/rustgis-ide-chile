@@ -39,6 +39,7 @@ DGA = "https://services3.arcgis.com/aSoEm9TBK2shtWjP/arcgis/rest/services/{}/Fea
 ENERGIA = "https://ide-energia.minenergia.cl/server/rest/services/IDE_Energia/{}/MapServer"
 
 SERNAGEOMIN_CREDIT = "SERNAGEOMIN (sernageomin.maps.arcgis.com)"
+SERNAGEOMIN_CONCESSIONS_CREDIT = "SERNAGEOMIN, Departamento de Propiedad Minera (catastro minero)"
 SBAP_CREDIT = "Servicio de Biodiversidad y Áreas Protegidas (SBAP)"
 DGA_CREDIT = "DGA, Ministerio de Obras Públicas"
 ENERGIA_CREDIT = "IDE Energía, Ministerio de Energía (ide-energia.minenergia.cl)"
@@ -62,6 +63,12 @@ DPA_FINE = 0.005
 DPA_COARSE = 0.02
 
 
+# The smallest scale (largest denominator) a layer is read in the map view at, unless it says
+# otherwise: the mining concessions, 2,000 to a request and tens of thousands to a mining
+# district's view at 1:1,000,000, need 1:100,000.
+MAX_VIEW_SCALE = 2_000_000
+
+
 def subs_of(id, show=None):
     """An ArcGIS service's queryable layers (the ones in `show`, or all): (id, name, bbox).
 
@@ -74,16 +81,16 @@ def subs_of(id, show=None):
     chosen = [l for l in layers if not show or l["id"] in show]
     assert chosen, id
     assert not show or len(chosen) == len(show), (id, show)
-    return [(l["id"], l["name"], l["bbox"] if isinstance(l.get("bbox"), list) else None) for l in chosen]
+    return [(l["id"], l["name"], l["bbox"] if isinstance(l.get("bbox"), list) else None, l.get("max") or 1000) for l in chosen]
 
 
-def arcgis(id, en, es, help_en, help_es, base, credit, show=None, whole=False, icon="polygon_layer", name=None, tiles=True, offset=OFFSET):
+def arcgis(id, en, es, help_en, help_es, base, credit, show=None, whole=False, icon="polygon_layer", name=None, tiles=True, offset=OFFSET, filter="", fields="", max_scale=MAX_VIEW_SCALE):
     subs = subs_of(id, show)
     assert not whole or len(subs) <= 1, (id, "a layer read whole is one layer")
     return dict(
         id=id, en=en, es=es, help_en=help_en, help_es=help_es, name=name or es, icon=icon,
         tiles=export(base, show) if tiles else "", service=base, kind="arcgis", layer="", subs=subs,
-        whole=whole, credit=credit, offset=offset,
+        whole=whole, credit=credit, offset=offset, filter=filter, fields=fields, max_scale=max_scale,
     )
 
 
@@ -104,16 +111,16 @@ def ine_2024(id, en, es, help_en, help_es, service, show=None, whole=False, icon
     return ine(id, en, es, help_en, help_es, service, show, whole, icon, name, credit=INE_2024_CREDIT, offset=offset)
 
 
-def hosted(id, en, es, help_en, help_es, base, credit, show=None, whole=False, icon="point_layer", name=None):
+def hosted(id, en, es, help_en, help_es, base, credit, show=None, whole=False, icon="point_layer", name=None, **kw):
     """A layer of an ArcGIS Online hosted feature service, which draws no map image."""
-    return arcgis(id, en, es, help_en, help_es, base, credit, show, whole, icon, name, tiles=False)
+    return arcgis(id, en, es, help_en, help_es, base, credit, show, whole, icon, name, tiles=False, **kw)
 
 
 def geoportal(id, en, es, help_en, help_es, workspace, typename, publisher, whole=False, icon="point_layer", name=None):
     return dict(
         id=id, en=en, es=es, help_en=help_en, help_es=help_es, name=name or es, icon=icon,
         tiles="", service=GEOPORTAL.format(workspace), kind="wfs", layer=f"{workspace}:{typename}", subs=[],
-        whole=whole, credit=GEOPORTAL_CREDIT.format(publisher), offset=OFFSET,
+        whole=whole, credit=GEOPORTAL_CREDIT.format(publisher), offset=OFFSET, filter="", fields="", max_scale=MAX_VIEW_SCALE,
     )
 
 
@@ -173,6 +180,7 @@ LAYERS = [
     # Mining and energy
     hosted("mining-installations", "Mining Installations", "Instalaciones mineras", "Mining installations registered by SERNAGEOMIN: mines, plants, tailings, waste dumps and more, with their company and operation. Read in the map view, up to 2,000 at a time.", "Instalaciones mineras catastradas por SERNAGEOMIN: minas, plantas, relaves, botaderos y otras, con su empresa y faena. Se lee en la vista del mapa, hasta 2.000 por vez.", SERNAGEOMIN.format("INSTALACIONES_MINERAS_20251126"), SERNAGEOMIN_CREDIT, name="Instalaciones mineras (SERNAGEOMIN)"),
     hosted("tailings", "Tailings Deposits 2025", "Catastro de relaves 2025", "The 2025 cadastre of mine tailings deposits (SERNAGEOMIN): active, inactive and abandoned, with their company, resource and volume.", "Catastro de depósitos de relaves 2025 (SERNAGEOMIN): activos, inactivos y abandonados, con su empresa, recurso y volumen.", SERNAGEOMIN.format("CDR_CHILE_PUNTUAL_2025"), SERNAGEOMIN_CREDIT, whole=True, name="Catastro de relaves 2025 (SERNAGEOMIN)"),
+    hosted("mining-concessions", "Mining Concessions", "Concesiones mineras", "SERNAGEOMIN's mining cadastre: the exploration and exploitation concessions in force (constituted or in process), with their roll number, name, hectares, holder and expiry; eliminated ones are left out. For consultation only: the Conservador de Minas' registry is the legal record. Read in the map view at 1:100,000 or closer, up to 2,000 at a time.", "Catastro minero de SERNAGEOMIN: las concesiones de exploración y explotación vigentes (constituidas o en trámite), con su rol, nombre, hectáreas, titular y vencimiento; las eliminadas quedan fuera. Solo para consulta: el registro legal es el del Conservador de Minas. Se lee en la vista del mapa a 1:100.000 o más cerca, hasta 2.000 por vez.", SERNAGEOMIN.format("WGS84"), SERNAGEOMIN_CONCESSIONS_CREDIT, show=[2], icon="polygon_layer", name="Concesiones mineras vigentes (SERNAGEOMIN)", filter="SITUACION_CONCESION <> 'ELIMINADA'", fields="NUMERO_ROL,DV_ROL,NOMBRE,TIPO_CONCESION,SITUACION_CONCESION,HECTAREAS,FECHA_VENCIMIENTO,ESTACAMENTO_SALITRERO,TITULAR_NOMBRE,NRO_INSCRIPCION,FOJAS,ANO_INSCRIPCION,COMUNA,DPA_COMUNA,HUSO,FECHA_ACTUALIZACION", max_scale=100_000),
     arcgis("energy", "Energy", "Energía", "Power plants (solar, wind, hydro, thermal, bioenergy, geothermal), substations and transmission lines (Ministry of Energy). Read in the map view.", "Centrales de generación (solares, eólicas, hidroeléctricas, termoeléctricas, de bioenergía y geotérmicas), subestaciones y líneas de transmisión (Ministerio de Energía). Se lee en la vista del mapa.", ENERGIA.format("Visor_IDE_Energ%C3%ADa"), ENERGIA_CREDIT, show=[1, 2, 3, 4, 5, 6, 8, 10], icon="point_layer", name="Energía (Ministerio de Energía)"),
     # Hazards, protected areas and water
     hosted("volcanoes", "Volcanic Risk 2023", "Riesgo volcánico 2023", "SERNAGEOMIN's 2023 ranking of the specific risk of Chile's 87 active volcanoes.", "Ranking 2023 de riesgo específico de los 87 volcanes activos de Chile (SERNAGEOMIN).", SERNAGEOMIN.format("Ranking_Volcanes_Chile_2023"), SERNAGEOMIN_CREDIT, whole=True, name="Riesgo volcánico 2023 (SERNAGEOMIN)"),
@@ -204,18 +212,18 @@ ISO_RECORDS = {}
 # The ribbon tab: group label (en, es) and its items (ids, or menus).
 TAB = [
     ("Boundaries", "Límites", ["regions", "communes"]),
-    ("Resources", "Recursos", [("Soils & Agriculture", "Suelos y agricultura", "polygon_layer", "Soils, land use, properties, irrigation and crops (IDE MINAGRI).", "Suelos, uso de la tierra, propiedades, riego y cultivos (IDE MINAGRI).", ["soils", "land-use", "rural-properties", "irrigation", "erosion", "fruit-cadastre", "weather-stations", "summer-pastures", "hunting-ban"]), ("Mining & Energy", "Minería y energía", "point_layer", "Mining installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).", "Instalaciones mineras, relaves e infraestructura energética (SERNAGEOMIN, Ministerio de Energía).", ["mining-installations", "tailings", "energy"])]),
+    ("Resources", "Recursos", [("Soils & Agriculture", "Suelos y agricultura", "polygon_layer", "Soils, land use, properties, irrigation and crops (IDE MINAGRI).", "Suelos, uso de la tierra, propiedades, riego y cultivos (IDE MINAGRI).", ["soils", "land-use", "rural-properties", "irrigation", "erosion", "fruit-cadastre", "weather-stations", "summer-pastures", "hunting-ban"]), ("Mining & Energy", "Minería y energía", "point_layer", "Mining concessions, installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).", "Concesiones e instalaciones mineras, relaves e infraestructura energética (SERNAGEOMIN, Ministerio de Energía).", ["mining-concessions", "mining-installations", "tailings", "energy"])]),
     ("Environment", "Medio ambiente", [("Environment & Hazards", "Medio ambiente y riesgos", "relief", "Wildfires, volcanoes, protected areas, wetlands, water and climate.", "Incendios, volcanes, áreas protegidas, humedales, aguas y clima.", ["wildfires", "volcanoes", "protected-areas", "ramsar", "wetlands", "hydrography", "basins", "aquifers", "water-scarcity", "hydrometric-network", "climate-zones"])]),
     ("Cities", "Ciudades", [("Cities & Housing", "Ciudades y vivienda", "polygon_layer", "Urban planning and housing layers (IDE MINVU).", "Capas de planificación urbana y vivienda (IDE MINVU).", ["urban-limits", "risk-areas", "heritage", "urban-wetlands", "settlements", "urban-parks", "housing-deficit", "bike-lanes"])]),
     ("Census", "Censo", [("Census 2024", "Censo 2024", "stats", "Census 2024 boundaries, indicators and neighbourhood units (INE).", "Límites, indicadores y unidades vecinales del Censo 2024 (INE).", ["census-2024-regions", "census-2024-provinces", "census-2024-communes", "census-2024-commune-indicators", "census-2024-region-indicators", "census-2024-neighbourhoods"]), ("Census 2017", "Censo 2017", "stats", "Census 2017 figures and microdata (INE).", "Cifras y microdatos del Censo 2017 (INE).", ["census-regions", "census-provinces", "census-communes", "census-blocks", "census-localities", "census-cities", "census-towns", "census-villages", "census-hamlets"])]),
     ("Services", "Servicios", [("Transport & Services", "Transporte y servicios", "point_layer", "Roads, railways, airports, schools, health, police and tourism (Geoportal de Chile).", "Red vial, ferrocarriles, aeródromos, escuelas, salud, Carabineros y turismo (Geoportal de Chile).", ["roads", "railways", "airports", "schools", "preschools", "higher-education", "health-services", "police", "municipalities", "capitals", "tourist-attractions", "street-markets", "sports", "sendero"])]),
     ("CUT", "CUT", ["tool:join-cut", "tool:assign-cut", "tool:complete-cut"]),
-    ("Manage", "Gestionar", ["tool:layer-metadata", "clear", "about"]),
+    ("Manage", "Gestionar", ["tool:layer-metadata", "about"]),
 ]
 
 PARAMS = '{"map"?: bool (the service\'s own map image as a web tile layer under the layers, instead of the features)}'
 
-VERSION = "0.4.0"
+VERSION = "0.5.0"
 DESCRIPTION = "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, the INE's Censuses 2024 and 2017, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names; Layer Metadata shows each layer's ISO 19115 record from the IDE Chile catalogue."
 DESCRIPTION_ES = "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, los Censos 2024 y 2017 del INE, SERNAGEOMIN, SBAP, DGA y el Ministerio de Energía. Límites, suelos, uso de la tierra, humedales, áreas protegidas, agua, minería, energía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables. Las herramientas CUT unen cualquier tabla de Chile a sus comunas, provincias o regiones por su código único territorial, asignan comunas a puntos y completan códigos y nombres; Metadatos de la capa muestra el registro ISO 19115 de cada capa del catálogo de IDE Chile."
 
@@ -229,13 +237,12 @@ MESSAGES = {
     "Added {name}.": "Añadida {name}.",
     "Added {name} in the map view.": "Añadida {name} en la vista del mapa.",
     "Downloading {name}; it is added when it lands.": "Descargando {name}; se añade cuando termine.",
-    "{name} is read in the map view: zoom in to 1:2,000,000 or closer first.": "{name} se lee en la vista del mapa: acerque primero a 1:2.000.000 o más cerca.",
+    "{name} is read in the map view: zoom in to 1:{scale} or closer first.": "{name} se lee en la vista del mapa: acerque primero a 1:{scale} o más cerca.",
+    "{name}: the map view holds more than the {n} features the service gives at once, so the layer is incomplete. Zoom in and choose it again.": "{name}: la vista del mapa tiene más de las {n} entidades que el servicio entrega por vez, así que la capa está incompleta. Acerque el mapa y vuelva a elegirla.",
     "Removed {name}.": "Quitada {name}.",
     "{name} has no map image.": "{name} no tiene imagen de mapa.",
     "Added {n} layers of {name} in the map view.": "Añadidas {n} capas de {name} en la vista del mapa.",
     "Nothing of {name} reaches the map view.": "Nada de {name} llega a la vista del mapa.",
-    "Removed {n} IDE Chile layers.": "Quitadas {n} capas de IDE Chile.",
-    "No IDE Chile map layers to remove.": "No hay capas de mapa de IDE Chile que quitar.",
     "IDE Chile: {n} layers from Geoportal de Chile, IDE MINAGRI, IDE MINVU, INE, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Each layer's credit names its source; Layer Metadata shows its ISO 19115 record.": "IDE Chile: {n} capas del Geoportal de Chile, IDE MINAGRI, IDE MINVU, INE, SERNAGEOMIN, SBAP, DGA y el Ministerio de Energía. El crédito de cada capa nombra su fuente; Metadatos de la capa muestra su registro ISO 19115.",
 }
 
@@ -626,7 +633,6 @@ def main():
     missing = [e["id"] for e in LAYERS if e["kind"] == "arcgis" and not e["subs"]]
     assert not missing, f"no layers read for {missing}: run python refresh.py services {' '.join(missing)}"
     commands = [command(e) for e in LAYERS] + [
-        {"id": "clear", "label": "Clear Map Images", "help": "Removes the IDE Chile map images (web tile layers) from the map.", "icon": "delete", "params": "{}"},
         {"id": "about", "label": "About IDE Chile", "help": "The sources behind the layers.", "icon": "help", "params": "{}"},
     ]
     es = {}
@@ -634,8 +640,6 @@ def main():
         es[e["en"]] = e["es"]
         es[e["help_en"]] = e["help_es"]
     es.update({
-        "Clear Map Images": "Quitar imágenes de mapa",
-        "Removes the IDE Chile map images (web tile layers) from the map.": "Quita del mapa las imágenes de mapa (capas de teselas) de IDE Chile.",
         "About IDE Chile": "Acerca de IDE Chile",
         "The sources behind the layers.": "Las fuentes de las capas.",
         "IDE Chile": "IDE Chile",
@@ -670,7 +674,7 @@ def main():
                     assert i in ids, i
                 out.append({"menu": menu_en, "icon": icon, "help": help_en, "items": entries})
             else:
-                assert it in ids or it in ("clear", "about") or it in tool_ids, it
+                assert it in ids or it == "about" or it in tool_ids, it
                 out.append(it)
         groups.append({"label": en, "items": out})
     assert 1 <= len(groups) <= 8, f"RustGIS takes 1 to 8 groups on a tab, not {len(groups)}"
@@ -703,13 +707,13 @@ def main():
 
     def sub(l):
         bbox = "Some([" + ", ".join(f"{v:.1f}" for v in l[2]) + "])" if l[2] else "None"
-        return f"Sub {{ id: {l[0]}, name: {s(l[1])}, bbox: {bbox} }}"
+        return f"Sub {{ id: {l[0]}, name: {s(l[1])}, bbox: {bbox}, max: {l[3]} }}"
 
     rows = []
     for e in LAYERS:
         subs = "&[" + ", ".join(sub(l) for l in e["subs"]) + "]"
         rows.append(
-            f"    Entry {{ id: {s(e['id'])}, name: {s(e['name'])}, tiles: {s(e['tiles'])}, service: {s(e['service'])}, kind: {s(e['kind'])}, layer: {s(e['layer'])}, subs: {subs}, whole: {'true' if e['whole'] else 'false'}, credit: {s(e['credit'])}, offset: {e['offset']!r} }},"
+            f"    Entry {{ id: {s(e['id'])}, name: {s(e['name'])}, tiles: {s(e['tiles'])}, service: {s(e['service'])}, kind: {s(e['kind'])}, layer: {s(e['layer'])}, subs: {subs}, whole: {'true' if e['whole'] else 'false'}, credit: {s(e['credit'])}, offset: {e['offset']!r}, filter: {s(e['filter'])}, fields: {s(e['fields'])}, max_scale: {float(e['max_scale'])!r} }},"
         )
     rs = "//! The layer catalog. Generated by `generate.py`: edit the table there, not this file.\n\nuse crate::{Entry, Sub};\n\n/// Every layer the plugin offers, in ribbon order.\npub const CATALOG: &[Entry] = &[\n" + "\n".join(rows) + "\n];\n"
     (root / "src" / "catalog.rs").write_text(rs, encoding="utf-8")
