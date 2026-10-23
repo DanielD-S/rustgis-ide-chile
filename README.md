@@ -3,25 +3,33 @@
 Public geospatial services of Chile as one-click layers for RustGIS: the
 [Geoportal de Chile](https://www.geoportal.cl) (the national node of IDE Chile),
 [IDE MINAGRI](https://ide.minagri.gob.cl) (the Ministry of Agriculture, served by CIREN),
-[IDE MINVU](https://ide.minvu.cl) (the Ministry of Housing and Urbanism) and the
-[INE](https://geoine-ine-chile.opendata.arcgis.com)'s Censuses 2024 and 2017.
+[IDE MINVU](https://ide.minvu.cl) (the Ministry of Housing and Urbanism), the
+[INE](https://geoine-ine-chile.opendata.arcgis.com)'s Censuses 2024 and 2017,
+[SERNAGEOMIN](https://www.sernageomin.cl) (mining and geology), the
+[SBAP](https://sbap.gob.cl) (protected areas), the [DGA](https://dga.mop.gob.cl) (water) and the
+[Ministry of Energy](https://ide-energia.minenergia.cl).
 
-Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools,
-health and tourism: 55 layers in a ribbon tab of their own, each a command that scripts, the
-command line and the AI Assistant can run too. And three **CUT tools** that join any table of
-Chile to its communes, provinces or regions by their código único territorial, however it is
-written, assign communes to points, and complete codes and names (see [The CUT tools](#the-cut-tools)).
+Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning,
+census data, roads, schools, health and tourism: 62 layers in a ribbon tab of their own, each a
+command that scripts, the command line and the AI Assistant can run too. Three **CUT tools** join
+any table of Chile to its communes, provinces or regions by their código único territorial,
+however it is written, assign communes to points, and complete codes and names (see
+[The CUT tools](#the-cut-tools)); **Layer Metadata** shows any layer's ISO 19115 record (see
+[Metadata (ISO 19115)](#metadata-iso-19115)).
 
 ## Its tab
 
 **IDE Chile**, at the end of the ribbon's tab strip:
 
 - **Boundaries**: Regions, Communes (IDE MINAGRI)
-- **Agriculture**: **Soils & Agriculture ▾** (9): agrological soils, land use (CONAF), rural
+- **Resources**: **Soils & Agriculture ▾** (9): agrological soils, land use (CONAF), rural
   properties, irrigation, erosion, fruit cadastre, weather stations, summer pastures, hunting ban
-  areas
-- **Environment**: **Environment & Hazards ▾** (7): wildfires 2024–2025, Ramsar wetlands, the
-  MMA wetlands inventory, hydrography, basins, aquifer restrictions, Köppen-Geiger climate zones
+  areas; **Mining & Energy ▾** (3): SERNAGEOMIN's mining installations and 2025 tailings
+  cadastre, and the Ministry of Energy's power plants, substations and transmission lines
+- **Environment**: **Environment & Hazards ▾** (11): wildfires 2024–2025, SERNAGEOMIN's 2023
+  volcanic risk ranking, the SBAP's protected areas, Ramsar wetlands, the MMA wetlands
+  inventory, hydrography, basins, aquifer restrictions, the DGA's water scarcity decrees in force
+  and its 2026 hydrometric network, Köppen-Geiger climate zones
 - **Cities**: **Cities & Housing ▾** (8): urban limits, IPT risk areas, heritage, urban
   wetlands, informal settlements, urban parks, housing deficit 2024, bike lanes (IDE MINVU)
 - **Census**: **Census 2024 ▾** (6): regions, provinces and communes of the political-administrative
@@ -33,7 +41,7 @@ written, assign communes to points, and complete codes and names (see [The CUT t
   attractions, street markets, sports facilities, Sendero de Chile (Geoportal de Chile)
 - **CUT**: Join Table by CUT, Assign Commune to Points, Complete CUT (geoprocessing tools, also
   in the Tools pane under Plugins › IDE Chile)
-- **Manage**: Clear IDE Chile, About IDE Chile
+- **Manage**: Layer Metadata (ISO 19115), Clear IDE Chile, About IDE Chile
 
 The interface is in English with a full Spanish translation; layer names on the map are the
 datasets' own names.
@@ -142,11 +150,47 @@ its credit, and the data stays under its publisher's terms:
 | [IDE MINVU](https://ide.minvu.cl) | ArcGIS Server (`geoide.minvu.cl`) | urban limits, risk areas, heritage, urban wetlands, settlements, parks, housing deficit, bike lanes |
 | [INE](https://geoine-ine-chile.opendata.arcgis.com) | ArcGIS Online feature services | Census 2024, Census 2017 |
 | [Geoportal de Chile](https://www.geoportal.cl) | GeoServer WFS (`geoportal.cl/geoserver`) | wetlands (MMA), hydrography, basins, aquifers, climate zones, roads, railways, airports, schools, health, police, municipalities, capitals, tourism, street markets, sports, Sendero de Chile |
+| [SERNAGEOMIN](https://www.sernageomin.cl) | ArcGIS Online feature services | mining installations, tailings cadastre 2025, volcanic risk ranking 2023 |
+| [SBAP](https://sbap.gob.cl) | ArcGIS Online feature service (Sistema de Información de la Biodiversidad) | protected areas |
+| [DGA](https://dga.mop.gob.cl) | ArcGIS Online feature services | water scarcity decrees in force, hydrometric network 2026 |
+| [Ministry of Energy](https://ide-energia.minenergia.cl) | ArcGIS Server (`ide-energia.minenergia.cl`) | power plants, substations, transmission lines |
+
+The layers added in 0.4.0 were found through the Geoportal de Chile's catalogue or their
+publisher's own ArcGIS organisation, and checked on 2026-10-23: each answers GeoJSON with its
+geometry. The SBAP's protected areas are 56 MB whole, so they are read in the map view; the DGA's
+services on the Ministry of Public Works' server (`rest-sit.mop.gob.cl`) answer no GeoJSON, so the
+plugin reads the DGA's ArcGIS Online copies. SERNAGEOMIN and the SEA have no service in the
+catalogue, and Bienes Nacionales' GeoServer refused connections that day.
 
 The Geoportal de Chile's WMS layers are published in EPSG:4326 only, which RustGIS's tile layers
-don't draw, so those layers are offered as features. Its catalogue (a CSW at
-`https://geoportal.cl/csw`, 996 records) can be searched from RustGIS once RustGIS sends the
-catalogue a filter it accepts.
+don't draw, so those layers are offered as features.
+
+## Metadata (ISO 19115)
+
+**Layer Metadata (ISO 19115)**, on the tab's **Manage** group and in the Tools pane under
+Plugins › IDE Chile, adds a table of the chosen layer's metadata as ISO 19115 elements: title,
+abstract, responsible party and its role, creation, publication and revision dates, topic
+category, scale, reference system, geographic extent, lineage, use limitation and constraints,
+online resources, and the record's own identifier, date, contact and standard.
+
+- Where the IDE Chile catalogue (the Geoportal de Chile's CSW, `https://geoportal.cl/csw`,
+  ISO 19139) has a record of the layer, the table is that record, with the address to read it
+  live (`GetRecordById`). A record is matched to a layer by the service address its online
+  resources name: 42 records for 36 layers, the Ministry of Energy's layers one by one.
+- Where it has none (the INE's census layers, most of IDE MINVU's, the new SERNAGEOMIN, SBAP and
+  DGA layers), the same elements come from the layer's ArcGIS service and its ArcGIS Online item,
+  and `MD_Metadata.metadataStandardName` says so.
+- The Ministry of Bienes Nacionales republishes other services' layers in the catalogue for its
+  emergency viewer ("[INFORMACIÓN BASE]"), and some of those records name the wrong service; they
+  aren't used.
+
+The records are read when the plugin is built (`python refresh.py metadata`, into
+`metadata.json`), so the tool works offline and in every RustGIS; its messages say when they were
+read. On the command line:
+
+```sh
+rustgis-cli run --plugin ide-chile-0.4.0.rgplugin   --cmd 'gp.run={"tool":"plugin:ide-chile/layer-metadata","params":{"layer":"Suelos agrológicos (CIREN)"}}'   --cmd 'share.exportTable={"table":"Metadata of Suelos agrológicos (CIREN)","path":"suelos-iso19115.csv"}'
+```
 
 ## Permissions
 
@@ -166,12 +210,13 @@ To try it, load the package (or this folder) in RustGIS with **Plugins › Plugi
 Settings › Add Plugin Folder…**, or on the command line with
 `rustgis-cli run --plugin dist/ide-chile-<version>.rgplugin --cmd 'plugin:ide-chile/about'`.
 
-`plugin.json`'s commands, tools, tab and translations, `src/catalog.rs` and `src/communes.rs` are
-generated by [`generate.py`](generate.py) from one table of layers, the tools' declarations, the
-other spellings and old codes the CUT tools recognise, and two files [`refresh.py`](refresh.py)
-reads from the services: `services.json`, what each ArcGIS service publishes (its queryable
-layers and their extents), and `communes.json`, the Census 2024 division (`python refresh.py &&
-python generate.py && cargo fmt`). Tests check they agree, that every spelling and old code names
+`plugin.json`'s commands, tools, tab and translations, `src/catalog.rs`, `src/communes.rs` and
+`src/metadata.rs` are generated by [`generate.py`](generate.py) from one table of layers, the
+tools' declarations, the other spellings and old codes the CUT tools recognise, and three files
+[`refresh.py`](refresh.py) reads from the services: `services.json`, what each ArcGIS service
+publishes (its queryable layers and their extents), `communes.json`, the Census 2024 division,
+and `metadata.json`, each layer's ISO 19115 record (`python refresh.py && python generate.py &&
+cargo fmt`; a new layer's service alone with `python refresh.py services <id>`). Tests check they agree, that every spelling and old code names
 a commune of the division, that every string has its Spanish, and run the three tools on small
 layers and tables. CI fails when the generated files don't match the table.
 

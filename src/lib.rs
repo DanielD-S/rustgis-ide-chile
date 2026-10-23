@@ -23,6 +23,8 @@ use rustgis_plugin::{Kind, Request, Value, host, json};
 mod catalog;
 mod communes;
 pub mod cut;
+pub mod iso;
+mod metadata;
 
 pub use catalog::CATALOG;
 
@@ -330,7 +332,7 @@ fn about(req: &Request) -> Result<Value, String> {
     let n = CATALOG.len().to_string();
     host::notify(&req.tr(
         MANIFEST,
-        "IDE Chile: {n} layers from Geoportal de Chile, IDE MINAGRI, IDE MINVU and INE. Each layer's credit names its source.",
+        "IDE Chile: {n} layers from Geoportal de Chile, IDE MINAGRI, IDE MINVU, INE, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Each layer's credit names its source; Layer Metadata shows its ISO 19115 record.",
         &[("n", &n)],
     ));
     let layers: Vec<Value> = CATALOG
@@ -380,7 +382,10 @@ mod tests {
         let ids: Vec<&str> = manifest["commands"].as_array().unwrap().iter().filter_map(|c| c["id"].as_str()).collect();
         let tools: Vec<String> =
             manifest["tools"].as_array().unwrap().iter().map(|t| format!("tool:{}", t["id"].as_str().unwrap())).collect();
-        assert_eq!(tools, ["tool:join-cut", "tool:assign-cut", "tool:complete-cut"]);
+        assert_eq!(tools, ["tool:join-cut", "tool:assign-cut", "tool:complete-cut", "tool:layer-metadata"]);
+        // RustGIS takes at most 64 commands, and 64 choices in a list: the metadata tool lists
+        // every layer.
+        assert!(ids.len() <= 64 && CATALOG.len() <= 64, "{} commands, {} layers", ids.len(), CATALOG.len());
         for g in manifest["tab"]["groups"].as_array().unwrap() {
             for it in g["items"].as_array().unwrap() {
                 match it {
@@ -404,10 +409,10 @@ mod tests {
                 panel: Default::default(),
                 panel_changed: Vec::new(),
             };
-            // Without its layers the tool fails on a missing parameter, not on an unknown id.
+            // Without its parameters a tool fails on a missing one, not on an unknown id.
             // (cut::run directly: handle() would link the host imports into the test binary.)
             let err = cut::run(&mut req.clone(), Default::default()).unwrap_err();
-            assert!(err.contains("is required"), "{}: {err}", t["id"]);
+            assert!(err.contains("is required") || err.contains("has no layer ''"), "{}: {err}", t["id"]);
             for p in t["params"].as_array().unwrap() {
                 let kind = p["kind"].as_str().unwrap();
                 assert!(["vectorLayer", "polygonLayer", "pointLayer", "file", "choice", "text", "bool"].contains(&kind), "{kind}");

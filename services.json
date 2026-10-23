@@ -3229,5 +3229,326 @@
     "max": 2000
    }
   ]
+ },
+ "mining-installations": {
+  "service": "https://services1.arcgis.com/OyjvVdFTl5hfSdX3/arcgis/rest/services/INSTALACIONES_MINERAS_20251126/FeatureServer",
+  "layers": [
+   {
+    "id": 0,
+    "name": "INSTALACIONES_MINERAS_20251126",
+    "geometry": "esriGeometryPoint",
+    "bbox": [
+     -8388102,
+     -7426612,
+     -7443967,
+     -1981719
+    ],
+    "max": 2000
+   }
+  ]
+ },
+ "tailings": {
+  "service": "https://services1.arcgis.com/OyjvVdFTl5hfSdX3/arcgis/rest/services/CDR_CHILE_PUNTUAL_2025/FeatureServer",
+  "layers": [
+   {
+    "id": 0,
+    "name": "CDR_CHILE_PUNTUAL_2025",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   }
+  ]
+ },
+ "energy": {
+  "service": "https://ide-energia.minenergia.cl/server/rest/services/IDE_Energia/Visor_IDE_Energ%C3%ADa/MapServer",
+  "layers": [
+   {
+    "id": 1,
+    "name": "Bioenergía",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 2,
+    "name": "Geotérmicas",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 3,
+    "name": "Eólicas",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 4,
+    "name": "Solares",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 5,
+    "name": "Termoeléctricas",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 6,
+    "name": "Hidroeléctricas",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 8,
+    "name": "Subestaciones",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 9,
+    "name": "Almacenamiento de Energía",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 10,
+    "name": "Línea de Transmisión",
+    "geometry": "esriGeometryPolyline",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 12,
+    "name": "Almacenamiento de Combustibles",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 13,
+    "name": "Terminal Marítimo",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 14,
+    "name": "Planta Satélite de Regasificación",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 15,
+    "name": "Gasoducto",
+    "geometry": "esriGeometryPolyline",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 16,
+    "name": "Oleoducto",
+    "geometry": "esriGeometryPolyline",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 18,
+    "name": "Electrolineras",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 19,
+    "name": "Estación de Servicio",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 22,
+    "name": "Potencial Eólico 2014",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 23,
+    "name": "Potencial Fotovoltaico 2014",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 24,
+    "name": "Potencial CSP 2014",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 25,
+    "name": "Potencial Hidroeléctrico 2014",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 27,
+    "name": "Potencial Hidroeléctrico 2021",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 28,
+    "name": "Potencial Hidro Bombeo de Agua de Mar 2021",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 29,
+    "name": "Potencial Eólico 2021",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 30,
+    "name": "Potencial Geotérmico 2021",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 31,
+    "name": "Potencial CSP 2021",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 32,
+    "name": "Potencial Fotovoltaico 2021",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 34,
+    "name": "Concesiones de Explotación",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 35,
+    "name": "Concesiones Solicitudes Geotérmicas",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 36,
+    "name": "Concesiones Exploración",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 37,
+    "name": "Bloque ENAP",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   },
+   {
+    "id": 38,
+    "name": "CEOP Vigente",
+    "geometry": "esriGeometryPolygon",
+    "bbox": null,
+    "max": 2000
+   }
+  ]
+ },
+ "volcanoes": {
+  "service": "https://services1.arcgis.com/OyjvVdFTl5hfSdX3/arcgis/rest/services/Ranking_Volcanes_Chile_2023/FeatureServer",
+  "layers": [
+   {
+    "id": 0,
+    "name": "Ranking_Volcanes_2023",
+    "geometry": "esriGeometryPoint",
+    "bbox": [
+     -12174679,
+     -9243652,
+     -6209401,
+     -2004918
+    ],
+    "max": 2000
+   }
+  ]
+ },
+ "protected-areas": {
+  "service": "https://services.arcgis.com/8NxRqxz24n3Tl3kM/arcgis/rest/services/%C3%81reas_Protegidas/FeatureServer",
+  "layers": [
+   {
+    "id": 0,
+    "name": "Areas_Protegidas_backup",
+    "geometry": "esriGeometryPolygon",
+    "bbox": [
+     -12600633,
+     -8367611,
+     -7465867,
+     -2043440
+    ],
+    "max": 2000
+   }
+  ]
+ },
+ "water-scarcity": {
+  "service": "https://services3.arcgis.com/aSoEm9TBK2shtWjP/arcgis/rest/services/Decretos_de_Escasez_Vigentes/FeatureServer",
+  "layers": [
+   {
+    "id": 0,
+    "name": "Decretos_de_Escasez_Hidrica_Vigentes",
+    "geometry": "esriGeometryPolygon",
+    "bbox": [
+     -8333327,
+     -5438396,
+     -7752212,
+     -2055580
+    ],
+    "max": 2000
+   }
+  ]
+ },
+ "hydrometric-network": {
+  "service": "https://services3.arcgis.com/aSoEm9TBK2shtWjP/arcgis/rest/services/Red_Hidrom%C3%A9trica_2026/FeatureServer",
+  "layers": [
+   {
+    "id": 0,
+    "name": "Red_Hidrometrica_Nacional 2026",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 1000
+   },
+   {
+    "id": 1,
+    "name": "Red_Hidrometrica_Nacional 2026",
+    "geometry": "esriGeometryPoint",
+    "bbox": null,
+    "max": 1000
+   }
+  ]
  }
 }

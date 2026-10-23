@@ -30,6 +30,19 @@ INE_CREDIT = "INE, Censo 2017 (geoine-ine-chile.opendata.arcgis.com)"
 INE_2024_CREDIT = "INE, Censo 2024 (geoine-ine-chile.opendata.arcgis.com)"
 GEOPORTAL_CREDIT = "Geoportal de Chile, IDE Chile ({})"
 
+# Mining, water, protected areas and energy (0.4.0). Each was found through the Geoportal de
+# Chile's catalogue (CSW) or the publisher's own ArcGIS organisation, and checked live: GeoJSON
+# answers with geometry (2026-10-23).
+SERNAGEOMIN = "https://services1.arcgis.com/OyjvVdFTl5hfSdX3/arcgis/rest/services/{}/FeatureServer"
+SBAP = "https://services.arcgis.com/8NxRqxz24n3Tl3kM/arcgis/rest/services/{}/FeatureServer"
+DGA = "https://services3.arcgis.com/aSoEm9TBK2shtWjP/arcgis/rest/services/{}/FeatureServer"
+ENERGIA = "https://ide-energia.minenergia.cl/server/rest/services/IDE_Energia/{}/MapServer"
+
+SERNAGEOMIN_CREDIT = "SERNAGEOMIN (sernageomin.maps.arcgis.com)"
+SBAP_CREDIT = "Servicio de Biodiversidad y Áreas Protegidas (SBAP)"
+DGA_CREDIT = "DGA, Ministerio de Obras Públicas"
+ENERGIA_CREDIT = "IDE Energía, Ministerio de Energía (ide-energia.minenergia.cl)"
+
 
 def export(base, show=None):
     """An ArcGIS MapServer export tile template, optionally of some layers only."""
@@ -50,7 +63,13 @@ DPA_COARSE = 0.02
 
 
 def subs_of(id, show=None):
-    """An ArcGIS service's queryable layers (the ones in `show`, or all): (id, name, bbox)."""
+    """An ArcGIS service's queryable layers (the ones in `show`, or all): (id, name, bbox).
+
+    A layer new to the table has none until refresh.py reads its service (`python refresh.py
+    services <id>`); main() refuses to write the catalog without them.
+    """
+    if id not in SERVICES:
+        return []
     layers = SERVICES[id]["layers"]
     chosen = [l for l in layers if not show or l["id"] in show]
     assert chosen, id
@@ -60,7 +79,7 @@ def subs_of(id, show=None):
 
 def arcgis(id, en, es, help_en, help_es, base, credit, show=None, whole=False, icon="polygon_layer", name=None, tiles=True, offset=OFFSET):
     subs = subs_of(id, show)
-    assert not whole or len(subs) == 1, (id, "a layer read whole is one layer")
+    assert not whole or len(subs) <= 1, (id, "a layer read whole is one layer")
     return dict(
         id=id, en=en, es=es, help_en=help_en, help_es=help_es, name=name or es, icon=icon,
         tiles=export(base, show) if tiles else "", service=base, kind="arcgis", layer="", subs=subs,
@@ -83,6 +102,11 @@ def ine(id, en, es, help_en, help_es, service, show=None, whole=False, icon="pol
 
 def ine_2024(id, en, es, help_en, help_es, service, show=None, whole=False, icon="polygon_layer", name=None, offset=OFFSET):
     return ine(id, en, es, help_en, help_es, service, show, whole, icon, name, credit=INE_2024_CREDIT, offset=offset)
+
+
+def hosted(id, en, es, help_en, help_es, base, credit, show=None, whole=False, icon="point_layer", name=None):
+    """A layer of an ArcGIS Online hosted feature service, which draws no map image."""
+    return arcgis(id, en, es, help_en, help_es, base, credit, show, whole, icon, name, tiles=False)
 
 
 def geoportal(id, en, es, help_en, help_es, workspace, typename, publisher, whole=False, icon="point_layer", name=None):
@@ -146,6 +170,15 @@ LAYERS = [
     ine("census-towns", "Towns", "Pueblos", "Towns of the Census 2017.", "Pueblos del Censo 2017.", "Pueblos_2017", whole=True, name="Censo 2017: pueblos"),
     ine("census-villages", "Villages", "Aldeas", "Villages (aldeas) of the Census 2017.", "Aldeas del Censo 2017.", "Aldeas_2017", whole=True, name="Censo 2017: aldeas"),
     ine("census-hamlets", "Hamlets", "Caseríos", "Hamlets (caseríos) of the Census 2017. Read in the map view, up to 2,000 at a time.", "Caseríos del Censo 2017. Se lee en la vista del mapa, hasta 2.000 por vez.", "Caserios_2017", icon="point_layer", name="Censo 2017: caseríos"),
+    # Mining and energy
+    hosted("mining-installations", "Mining Installations", "Instalaciones mineras", "Mining installations registered by SERNAGEOMIN: mines, plants, tailings, waste dumps and more, with their company and operation. Read in the map view, up to 2,000 at a time.", "Instalaciones mineras catastradas por SERNAGEOMIN: minas, plantas, relaves, botaderos y otras, con su empresa y faena. Se lee en la vista del mapa, hasta 2.000 por vez.", SERNAGEOMIN.format("INSTALACIONES_MINERAS_20251126"), SERNAGEOMIN_CREDIT, name="Instalaciones mineras (SERNAGEOMIN)"),
+    hosted("tailings", "Tailings Deposits 2025", "Catastro de relaves 2025", "The 2025 cadastre of mine tailings deposits (SERNAGEOMIN): active, inactive and abandoned, with their company, resource and volume.", "Catastro de depósitos de relaves 2025 (SERNAGEOMIN): activos, inactivos y abandonados, con su empresa, recurso y volumen.", SERNAGEOMIN.format("CDR_CHILE_PUNTUAL_2025"), SERNAGEOMIN_CREDIT, whole=True, name="Catastro de relaves 2025 (SERNAGEOMIN)"),
+    arcgis("energy", "Energy", "Energía", "Power plants (solar, wind, hydro, thermal, bioenergy, geothermal), substations and transmission lines (Ministry of Energy). Read in the map view.", "Centrales de generación (solares, eólicas, hidroeléctricas, termoeléctricas, de bioenergía y geotérmicas), subestaciones y líneas de transmisión (Ministerio de Energía). Se lee en la vista del mapa.", ENERGIA.format("Visor_IDE_Energ%C3%ADa"), ENERGIA_CREDIT, show=[1, 2, 3, 4, 5, 6, 8, 10], icon="point_layer", name="Energía (Ministerio de Energía)"),
+    # Hazards, protected areas and water
+    hosted("volcanoes", "Volcanic Risk 2023", "Riesgo volcánico 2023", "SERNAGEOMIN's 2023 ranking of the specific risk of Chile's 87 active volcanoes.", "Ranking 2023 de riesgo específico de los 87 volcanes activos de Chile (SERNAGEOMIN).", SERNAGEOMIN.format("Ranking_Volcanes_Chile_2023"), SERNAGEOMIN_CREDIT, whole=True, name="Riesgo volcánico 2023 (SERNAGEOMIN)"),
+    hosted("protected-areas", "Protected Areas", "Áreas protegidas", "The National System of Protected Areas: national parks, reserves and monuments, marine and private protected areas, nature sanctuaries (SBAP). Read in the map view.", "Sistema Nacional de Áreas Protegidas: parques, reservas y monumentos nacionales, áreas marinas y privadas protegidas, santuarios de la naturaleza (SBAP). Se lee en la vista del mapa.", SBAP.format("%C3%81reas_Protegidas"), SBAP_CREDIT, icon="polygon_layer", name="Áreas protegidas (SBAP)"),
+    hosted("water-scarcity", "Water Scarcity Decrees", "Decretos de escasez hídrica", "The areas under a water scarcity decree in force (DGA).", "Territorios con decreto de escasez hídrica vigente (DGA).", DGA.format("Decretos_de_Escasez_Vigentes"), DGA_CREDIT, whole=True, icon="polygon_layer", name="Decretos de escasez hídrica vigentes (DGA)"),
+    hosted("hydrometric-network", "Hydrometric Network", "Red hidrométrica", "The DGA's 2026 national hydrometric network: river flow, weather, water quality, lake, snow and groundwater stations. Read in the map view, up to 1,000 at a time.", "Red hidrométrica nacional 2026 de la DGA: estaciones fluviométricas, meteorológicas, de calidad de aguas, de lagos, nivométricas y de pozos. Se lee en la vista del mapa, hasta 1.000 por vez.", DGA.format("Red_Hidrom%C3%A9trica_2026"), DGA_CREDIT, show=[0], name="Red hidrométrica 2026 (DGA)"),
     # Transport and services (Geoportal de Chile)
     geoportal("roads", "Road Network", "Red vial", "The road network (Instituto de la Propiedad). Read in the map view.", "Red vial (Instituto de la Propiedad). Se lee en la vista del mapa.", "Redvial", "red_vial", "Instituto de la Propiedad", icon="line_layer", name="Red vial"),
     geoportal("railways", "Railways", "Red ferroviaria", "The railway network (Biblioteca del Congreso Nacional).", "Red ferroviaria (Biblioteca del Congreso Nacional).", "Red_Ferroviaria", "red_ferroviaria", "BCN", whole=True, icon="line_layer", name="Red ferroviaria (BCN)"),
@@ -163,23 +196,28 @@ LAYERS = [
     geoportal("sendero", "Sendero de Chile", "Sendero de Chile", "The Sendero de Chile trail (MMA).", "Sendero de Chile (MMA).", "Sendero_Chile", "sendero_de_chile", "MMA", whole=True, icon="line_layer", name="Sendero de Chile (MMA)"),
 ]
 
+# The catalogue record (fileIdentifier) of a layer, where refresh.py's own choice (the record whose
+# online resource names the layer's service: the publisher's over a mirror, then the newest)
+# isn't the right one. Empty: every match was checked on 2026-10-23.
+ISO_RECORDS = {}
+
 # The ribbon tab: group label (en, es) and its items (ids, or menus).
 TAB = [
     ("Boundaries", "Límites", ["regions", "communes"]),
-    ("Agriculture", "Agricultura", [("Soils & Agriculture", "Suelos y agricultura", "polygon_layer", "Soils, land use, properties, irrigation and crops (IDE MINAGRI).", "Suelos, uso de la tierra, propiedades, riego y cultivos (IDE MINAGRI).", ["soils", "land-use", "rural-properties", "irrigation", "erosion", "fruit-cadastre", "weather-stations", "summer-pastures", "hunting-ban"])]),
-    ("Environment", "Medio ambiente", [("Environment & Hazards", "Medio ambiente y riesgos", "relief", "Wildfires, wetlands, water and climate.", "Incendios, humedales, aguas y clima.", ["wildfires", "ramsar", "wetlands", "hydrography", "basins", "aquifers", "climate-zones"])]),
+    ("Resources", "Recursos", [("Soils & Agriculture", "Suelos y agricultura", "polygon_layer", "Soils, land use, properties, irrigation and crops (IDE MINAGRI).", "Suelos, uso de la tierra, propiedades, riego y cultivos (IDE MINAGRI).", ["soils", "land-use", "rural-properties", "irrigation", "erosion", "fruit-cadastre", "weather-stations", "summer-pastures", "hunting-ban"]), ("Mining & Energy", "Minería y energía", "point_layer", "Mining installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).", "Instalaciones mineras, relaves e infraestructura energética (SERNAGEOMIN, Ministerio de Energía).", ["mining-installations", "tailings", "energy"])]),
+    ("Environment", "Medio ambiente", [("Environment & Hazards", "Medio ambiente y riesgos", "relief", "Wildfires, volcanoes, protected areas, wetlands, water and climate.", "Incendios, volcanes, áreas protegidas, humedales, aguas y clima.", ["wildfires", "volcanoes", "protected-areas", "ramsar", "wetlands", "hydrography", "basins", "aquifers", "water-scarcity", "hydrometric-network", "climate-zones"])]),
     ("Cities", "Ciudades", [("Cities & Housing", "Ciudades y vivienda", "polygon_layer", "Urban planning and housing layers (IDE MINVU).", "Capas de planificación urbana y vivienda (IDE MINVU).", ["urban-limits", "risk-areas", "heritage", "urban-wetlands", "settlements", "urban-parks", "housing-deficit", "bike-lanes"])]),
     ("Census", "Censo", [("Census 2024", "Censo 2024", "stats", "Census 2024 boundaries, indicators and neighbourhood units (INE).", "Límites, indicadores y unidades vecinales del Censo 2024 (INE).", ["census-2024-regions", "census-2024-provinces", "census-2024-communes", "census-2024-commune-indicators", "census-2024-region-indicators", "census-2024-neighbourhoods"]), ("Census 2017", "Censo 2017", "stats", "Census 2017 figures and microdata (INE).", "Cifras y microdatos del Censo 2017 (INE).", ["census-regions", "census-provinces", "census-communes", "census-blocks", "census-localities", "census-cities", "census-towns", "census-villages", "census-hamlets"])]),
     ("Services", "Servicios", [("Transport & Services", "Transporte y servicios", "point_layer", "Roads, railways, airports, schools, health, police and tourism (Geoportal de Chile).", "Red vial, ferrocarriles, aeródromos, escuelas, salud, Carabineros y turismo (Geoportal de Chile).", ["roads", "railways", "airports", "schools", "preschools", "higher-education", "health-services", "police", "municipalities", "capitals", "tourist-attractions", "street-markets", "sports", "sendero"])]),
     ("CUT", "CUT", ["tool:join-cut", "tool:assign-cut", "tool:complete-cut"]),
-    ("Manage", "Gestionar", ["clear", "about"]),
+    ("Manage", "Gestionar", ["tool:layer-metadata", "clear", "about"]),
 ]
 
 PARAMS = '{"map"?: bool (the service\'s own map image as a web tile layer under the layers, instead of the features)}'
 
-VERSION = "0.3.1"
-DESCRIPTION = "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names."
-DESCRIPTION_ES = "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU y los Censos 2024 y 2017 del INE. Límites, suelos, uso de la tierra, humedales, hidrografía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables. Las herramientas CUT unen cualquier tabla de Chile a sus comunas, provincias o regiones por su código único territorial, asignan comunas a puntos y completan códigos y nombres."
+VERSION = "0.4.0"
+DESCRIPTION = "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, the INE's Censuses 2024 and 2017, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names; Layer Metadata shows each layer's ISO 19115 record from the IDE Chile catalogue."
+DESCRIPTION_ES = "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, los Censos 2024 y 2017 del INE, SERNAGEOMIN, SBAP, DGA y el Ministerio de Energía. Límites, suelos, uso de la tierra, humedales, áreas protegidas, agua, minería, energía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables. Las herramientas CUT unen cualquier tabla de Chile a sus comunas, provincias o regiones por su código único territorial, asignan comunas a puntos y completan códigos y nombres; Metadatos de la capa muestra el registro ISO 19115 de cada capa del catálogo de IDE Chile."
 
 # Messages the module builds while it runs (see src/lib.rs), with their Spanish.
 MESSAGES = {
@@ -198,7 +236,7 @@ MESSAGES = {
     "Nothing of {name} reaches the map view.": "Nada de {name} llega a la vista del mapa.",
     "Removed {n} IDE Chile layers.": "Quitadas {n} capas de IDE Chile.",
     "No IDE Chile map layers to remove.": "No hay capas de mapa de IDE Chile que quitar.",
-    "IDE Chile: {n} layers from Geoportal de Chile, IDE MINAGRI, IDE MINVU and INE. Each layer's credit names its source.": "IDE Chile: {n} capas del Geoportal de Chile, IDE MINAGRI, IDE MINVU e INE. El crédito de cada capa nombra su fuente.",
+    "IDE Chile: {n} layers from Geoportal de Chile, IDE MINAGRI, IDE MINVU, INE, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Each layer's credit names its source; Layer Metadata shows its ISO 19115 record.": "IDE Chile: {n} capas del Geoportal de Chile, IDE MINAGRI, IDE MINVU, INE, SERNAGEOMIN, SBAP, DGA y el Ministerio de Energía. El crédito de cada capa nombra su fuente; Metadatos de la capa muestra su registro ISO 19115.",
 }
 
 
@@ -352,6 +390,115 @@ TOOLS = [
     }),
 ]
 
+# ---------------------------------------------------------------------------------------------
+# Layer Metadata (ISO 19115): each catalog layer's record(s), read by refresh.py into
+# metadata.json from the Geoportal de Chile's catalogue (or, without a record there, from the
+# layer's ArcGIS service), and generated here into src/metadata.rs. The tool picks the layer from
+# a list (at most 64 choices, so the catalog stays within that) and adds the record as a table.
+
+METADATA = json.loads((root / "metadata.json").read_text(encoding="utf-8"))
+
+# The ISO 19115 elements the records carry, in table order, with an English description and its
+# Spanish.
+ISO_ELEMENTS = [
+    ("CI_Citation.title", "Title", "Título"),
+    ("MD_DataIdentification.abstract", "Abstract", "Resumen"),
+    ("MD_DataIdentification.pointOfContact", "Responsible party (role)", "Responsable (rol)"),
+    ("CI_Citation.date.creation", "Creation date", "Fecha de creación"),
+    ("CI_Citation.date.publication", "Publication date", "Fecha de publicación"),
+    ("CI_Citation.date.revision", "Revision date", "Fecha de revisión"),
+    ("MD_DataIdentification.topicCategory", "Topic category", "Categoría temática"),
+    ("MD_Resolution.equivalentScale", "Scale", "Escala"),
+    ("MD_ReferenceSystem.referenceSystemIdentifier", "Reference system", "Sistema de referencia"),
+    ("EX_GeographicBoundingBox", "Geographic extent", "Extensión geográfica"),
+    ("LI_Lineage.statement", "Lineage", "Linaje"),
+    ("MD_Constraints.useLimitation", "Use limitation", "Limitación de uso"),
+    ("MD_LegalConstraints.accessConstraints", "Access constraints", "Restricciones de acceso"),
+    ("MD_LegalConstraints.otherConstraints", "Other constraints", "Otras restricciones"),
+    ("CI_OnlineResource.linkage", "Online resource", "Recurso en línea"),
+    ("MD_Metadata.fileIdentifier", "Metadata identifier", "Identificador de los metadatos"),
+    ("MD_Metadata.dateStamp", "Metadata date", "Fecha de los metadatos"),
+    ("MD_Metadata.contact", "Metadata contact", "Contacto de los metadatos"),
+    ("MD_Metadata.metadataStandardName", "Metadata standard", "Norma de los metadatos"),
+    ("CSW.GetRecordById", "Record in the catalogue (CSW)", "Registro en el catálogo (CSW)"),
+]
+
+METADATA_TOOL = ({
+    "id": "layer-metadata", "name": "Layer Metadata (ISO 19115)", "toolbox": "IDE Chile",
+    "summary": "The metadata of an IDE Chile layer, as ISO 19115 elements: title, abstract, responsible party, dates, scale, reference system, extent, lineage, constraints and where to get it. From the IDE Chile catalogue (the Geoportal de Chile's CSW) where it has a record of the layer, else from the layer's own ArcGIS service.",
+    "params": [
+        {"name": "layer", "label": "IDE Chile layer", "kind": "choice", "choices": [], "default": "", "required": True, "help": "One of the plugin's layers, by its name on the map."},
+    ],
+}, {
+    "Layer Metadata (ISO 19115)": "Metadatos de la capa (ISO 19115)",
+    "The metadata of an IDE Chile layer, as ISO 19115 elements: title, abstract, responsible party, dates, scale, reference system, extent, lineage, constraints and where to get it. From the IDE Chile catalogue (the Geoportal de Chile's CSW) where it has a record of the layer, else from the layer's own ArcGIS service.": "Los metadatos de una capa de IDE Chile, como elementos ISO 19115: título, resumen, responsable, fechas, escala, sistema de referencia, extensión, linaje, restricciones y dónde obtenerla. Del catálogo de IDE Chile (el CSW del Geoportal de Chile) cuando tiene un registro de la capa, si no del propio servicio ArcGIS de la capa.",
+    "IDE Chile layer": "Capa de IDE Chile",
+    "One of the plugin's layers, by its name on the map.": "Una de las capas del complemento, por su nombre en el mapa.",
+})
+
+METADATA_MESSAGES = {
+    "Metadata of {name}": "Metadatos de {name}",
+    "Record": "Registro",
+    "ISO 19115 element": "Elemento ISO 19115",
+    "Description": "Descripción",
+    "Value": "Valor",
+    "{name}: {n} records from the IDE Chile catalogue (CSW).": "{name}: {n} registros del catálogo de IDE Chile (CSW).",
+    "{name}: the record of the IDE Chile catalogue (CSW).": "{name}: el registro del catálogo de IDE Chile (CSW).",
+    "{name}: the IDE Chile catalogue has no record of this layer; its ISO 19115 elements come from its ArcGIS service.": "{name}: el catálogo de IDE Chile no tiene un registro de esta capa; sus elementos ISO 19115 vienen de su servicio ArcGIS.",
+    "Metadata read on {date}; the live record may be newer.": "Metadatos leídos el {date}; el registro vigente puede ser más reciente.",
+    "IDE Chile has no layer '{name}'.": "IDE Chile no tiene una capa '{name}'.",
+    "{name} has no metadata.": "{name} no tiene metadatos.",
+}
+
+
+def metadata_rs():
+    """src/metadata.rs: the records of metadata.json, checked against the catalog."""
+    entries = {e["id"]: e for e in LAYERS}
+    known = {p for p, _, _ in ISO_ELEMENTS}
+    covered = set()
+    rows = []
+
+    def s(x):
+        return json.dumps(x, ensure_ascii=False)
+
+    for r in METADATA["records"]:
+        e = entries.get(r["entry"])
+        assert e, f"metadata.json names {r['entry']}, which isn't in the catalog"
+        if r["sub"] is not None:
+            assert r["sub"] in {x[0] for x in e["subs"]}, (r["entry"], r["sub"])
+        for path, _ in r["elements"]:
+            assert path in known, (r["entry"], path)
+        covered.add(r["entry"])
+        elements = ", ".join(f"({s(p)}, {s(v)})" for p, v in r["elements"])
+        sub = f"Some({r['sub']})" if r["sub"] is not None else "None"
+        rows.append(f"    Record {{ entry: {s(r['entry'])}, sub: {sub}, source: {s(r['source'])}, elements: &[{elements}] }},")
+    missing = set(entries) - covered
+    assert not missing, f"no metadata for {missing}: run python refresh.py metadata"
+    out = [
+        "//! The ISO 19115 metadata of the catalog's layers. Generated by `generate.py` from",
+        "//! `metadata.json` (refresh.py reads it from the IDE Chile catalogue and the services);",
+        "//! edit neither by hand.",
+        "",
+        "use crate::iso::Record;",
+        "",
+        "/// The day the records were read.",
+        f"pub const READ: &str = {s(METADATA['read'])};",
+        "",
+        "/// The ISO 19115 elements in table order: (element, English description).",
+        "pub const ELEMENTS: &[(&str, &str)] = &[",
+        *[f"    ({s(p)}, {s(en)})," for p, en, _ in ISO_ELEMENTS],
+        "];",
+        "",
+        "/// Each layer's records: one for the layer, or one per service layer it reads.",
+        "pub const RECORDS: &[Record] = &[",
+        *rows,
+        "];",
+        "",
+    ]
+    (root / "src" / "metadata.rs").write_text("\n".join(out), encoding="utf-8")
+    return len(rows), sum(r["source"] == "csw" for r in METADATA["records"])
+
+
 TOOL_STRINGS_ES = {
     "Level": "Nivel",
     LEVEL_HELP: LEVEL_HELP_ES,
@@ -476,6 +623,8 @@ def command(e):
 def main():
     ids = {e["id"] for e in LAYERS}
     assert len(ids) == len(LAYERS), "duplicate ids"
+    missing = [e["id"] for e in LAYERS if e["kind"] == "arcgis" and not e["subs"]]
+    assert not missing, f"no layers read for {missing}: run python refresh.py services {' '.join(missing)}"
     commands = [command(e) for e in LAYERS] + [
         {"id": "clear", "label": "Clear Map Images", "help": "Removes the IDE Chile map images (web tile layers) from the map.", "icon": "delete", "params": "{}"},
         {"id": "about", "label": "About IDE Chile", "help": "The sources behind the layers.", "icon": "help", "params": "{}"},
@@ -494,9 +643,17 @@ def main():
     })
     es.update(MESSAGES)
     tools = []
-    for t, t_es in TOOLS:
+    for t, t_es in TOOLS + [METADATA_TOOL]:
         tools.append(t)
         es.update(t_es)
+    names = [e["name"] for e in LAYERS]
+    assert len(names) == len(set(names)) and len(names) <= 64, "the metadata tool lists every layer's name: unique, at most 64"
+    METADATA_TOOL[0]["params"][0]["choices"] = names
+    METADATA_TOOL[0]["params"][0]["default"] = names[0]
+    # The names are the datasets' own (Spanish), the same in every language.
+    es.update({n: n for n in names})
+    es.update({en: es_ for _, en, es_ in ISO_ELEMENTS})
+    es.update(METADATA_MESSAGES)
     es.update(TOOL_STRINGS_ES)
     es.update(TOOL_MESSAGES)
     tool_ids = {"tool:" + t["id"] for t in tools}
@@ -516,6 +673,7 @@ def main():
                 assert it in ids or it in ("clear", "about") or it in tool_ids, it
                 out.append(it)
         groups.append({"label": en, "items": out})
+    assert 1 <= len(groups) <= 8, f"RustGIS takes 1 to 8 groups on a tab, not {len(groups)}"
     placed = {i for g in groups for it in g["items"] for i in (it["items"] if isinstance(it, dict) else [it])}
     assert placed >= ids | tool_ids, (ids | tool_ids) - placed
     manifest = {
@@ -538,6 +696,7 @@ def main():
     }
     (root / "plugin.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     n_communes, n_provinces, n_regions = communes_rs()
+    n_records, n_csw = metadata_rs()
 
     def s(x):
         return json.dumps(x, ensure_ascii=False)
@@ -554,7 +713,7 @@ def main():
         )
     rs = "//! The layer catalog. Generated by `generate.py`: edit the table there, not this file.\n\nuse crate::{Entry, Sub};\n\n/// Every layer the plugin offers, in ribbon order.\npub const CATALOG: &[Entry] = &[\n" + "\n".join(rows) + "\n];\n"
     (root / "src" / "catalog.rs").write_text(rs, encoding="utf-8")
-    print(f"{len(LAYERS)} layers, {len(commands)} commands, {len(tools)} tools, {len(es)} Spanish strings; {n_communes} communes, {n_provinces} provinces, {n_regions} regions")
+    print(f"{len(LAYERS)} layers, {len(commands)} commands, {len(tools)} tools, {len(es)} Spanish strings; {n_communes} communes, {n_provinces} provinces, {n_regions} regions; {n_records} metadata records ({n_csw} from the catalogue)")
 
 
 if __name__ == "__main__":

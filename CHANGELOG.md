@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.0 (2026-10-23)
+
+- Seven layers of mining, water, protected areas and energy, found through the IDE Chile
+  catalogue or their publisher's ArcGIS organisation and checked live: SERNAGEOMIN's mining
+  installations, 2025 tailings cadastre and 2023 volcanic risk ranking; the SBAP's protected
+  areas; the DGA's water scarcity decrees in force and 2026 hydrometric network; and the Ministry
+  of Energy's power plants, substations and transmission lines. 62 layers; the plugin's 64
+  commands are RustGIS's limit.
+- **Layer Metadata (ISO 19115)**, a tool: the chosen layer's metadata as a table of ISO 19115
+  elements, from its record in the IDE Chile catalogue (the Geoportal de Chile's CSW) where there
+  is one (42 records for 36 layers), else from its ArcGIS service. Read by `refresh.py` into
+  `metadata.json`, so it works offline and in every RustGIS.
+- The ribbon's Agriculture group is now Resources, with the Soils & Agriculture and Mining &
+  Energy menus (RustGIS takes at most 8 groups on a tab).
+
 ## 0.3.1 (2026-10-22)
 
 - The Census 2024 regions, provinces and communes come with their geometry: the INE's boundary

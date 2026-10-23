@@ -1099,6 +1099,7 @@ pub fn run(req: &mut Request, mut layers: Layers) -> Result<Output, String> {
         "join-cut" => join(req, &mut layers),
         "assign-cut" => assign(req, &mut layers),
         "complete-cut" => complete(req, &mut layers),
+        "layer-metadata" => crate::iso::run(req),
         other => Err(format!("IDE Chile has no tool '{other}'")),
     }
 }
