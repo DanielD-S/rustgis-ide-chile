@@ -1,7 +1,7 @@
 {
   "id": "ide-chile",
   "name": "IDE Chile",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, the INE's Censuses 2024 and 2017, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names; Layer Metadata shows each layer's ISO 19115 record from the IDE Chile catalogue.",
   "author": "Daniel Díaz",
   "homepage": "https://github.com/DanielD-S/rustgis-ide-chile",
@@ -314,13 +314,6 @@
       "label": "Tailings Deposits 2025",
       "help": "The 2025 cadastre of mine tailings deposits (SERNAGEOMIN): active, inactive and abandoned, with their company, resource and volume.",
       "icon": "point_layer",
-      "params": "{\"map\"?: bool (the service's own map image as a web tile layer under the layers, instead of the features)}"
-    },
-    {
-      "id": "mining-concessions",
-      "label": "Mining Concessions",
-      "help": "SERNAGEOMIN's mining cadastre: the exploration and exploitation concessions in force (constituted or in process), with their roll number, name, hectares, holder and expiry; eliminated ones are left out. For consultation only: the Conservador de Minas' registry is the legal record. Read in the map view at 1:100,000 or closer, up to 2,000 at a time.",
-      "icon": "polygon_layer",
       "params": "{\"map\"?: bool (the service's own map image as a web tile layer under the layers, instead of the features)}"
     },
     {
@@ -657,7 +650,6 @@
             "Censo 2017: caseríos",
             "Instalaciones mineras (SERNAGEOMIN)",
             "Catastro de relaves 2025 (SERNAGEOMIN)",
-            "Concesiones mineras vigentes (SERNAGEOMIN)",
             "Energía (Ministerio de Energía)",
             "Riesgo volcánico 2023 (SERNAGEOMIN)",
             "Áreas protegidas (SBAP)",
@@ -717,9 +709,8 @@
           {
             "menu": "Mining & Energy",
             "icon": "point_layer",
-            "help": "Mining concessions, installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).",
+            "help": "Mining installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).",
             "items": [
-              "mining-concessions",
               "mining-installations",
               "tailings",
               "energy"
@@ -930,8 +921,6 @@
       "Mining installations registered by SERNAGEOMIN: mines, plants, tailings, waste dumps and more, with their company and operation. Read in the map view, up to 2,000 at a time.": "Instalaciones mineras catastradas por SERNAGEOMIN: minas, plantas, relaves, botaderos y otras, con su empresa y faena. Se lee en la vista del mapa, hasta 2.000 por vez.",
       "Tailings Deposits 2025": "Catastro de relaves 2025",
       "The 2025 cadastre of mine tailings deposits (SERNAGEOMIN): active, inactive and abandoned, with their company, resource and volume.": "Catastro de depósitos de relaves 2025 (SERNAGEOMIN): activos, inactivos y abandonados, con su empresa, recurso y volumen.",
-      "Mining Concessions": "Concesiones mineras",
-      "SERNAGEOMIN's mining cadastre: the exploration and exploitation concessions in force (constituted or in process), with their roll number, name, hectares, holder and expiry; eliminated ones are left out. For consultation only: the Conservador de Minas' registry is the legal record. Read in the map view at 1:100,000 or closer, up to 2,000 at a time.": "Catastro minero de SERNAGEOMIN: las concesiones de exploración y explotación vigentes (constituidas o en trámite), con su rol, nombre, hectáreas, titular y vencimiento; las eliminadas quedan fuera. Solo para consulta: el registro legal es el del Conservador de Minas. Se lee en la vista del mapa a 1:100.000 o más cerca, hasta 2.000 por vez.",
       "Energy": "Energía",
       "Power plants (solar, wind, hydro, thermal, bioenergy, geothermal), substations and transmission lines (Ministry of Energy). Read in the map view.": "Centrales de generación (solares, eólicas, hidroeléctricas, termoeléctricas, de bioenergía y geotérmicas), subestaciones y líneas de transmisión (Ministerio de Energía). Se lee en la vista del mapa.",
       "Volcanic Risk 2023": "Riesgo volcánico 2023",
@@ -1059,7 +1048,6 @@
       "Censo 2017: caseríos": "Censo 2017: caseríos",
       "Instalaciones mineras (SERNAGEOMIN)": "Instalaciones mineras (SERNAGEOMIN)",
       "Catastro de relaves 2025 (SERNAGEOMIN)": "Catastro de relaves 2025 (SERNAGEOMIN)",
-      "Concesiones mineras vigentes (SERNAGEOMIN)": "Concesiones mineras vigentes (SERNAGEOMIN)",
       "Energía (Ministerio de Energía)": "Energía (Ministerio de Energía)",
       "Riesgo volcánico 2023 (SERNAGEOMIN)": "Riesgo volcánico 2023 (SERNAGEOMIN)",
       "Áreas protegidas (SBAP)": "Áreas protegidas (SBAP)",
@@ -1156,7 +1144,7 @@
       "Soils & Agriculture": "Suelos y agricultura",
       "Soils, land use, properties, irrigation and crops (IDE MINAGRI).": "Suelos, uso de la tierra, propiedades, riego y cultivos (IDE MINAGRI).",
       "Mining & Energy": "Minería y energía",
-      "Mining concessions, installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).": "Concesiones e instalaciones mineras, relaves e infraestructura energética (SERNAGEOMIN, Ministerio de Energía).",
+      "Mining installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).": "Instalaciones mineras, relaves e infraestructura energética (SERNAGEOMIN, Ministerio de Energía).",
       "Environment": "Medio ambiente",
       "Environment & Hazards": "Medio ambiente y riesgos",
       "Wildfires, volcanoes, protected areas, wetlands, water and climate.": "Incendios, volcanes, áreas protegidas, humedales, aguas y clima.",

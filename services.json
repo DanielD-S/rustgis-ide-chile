@@ -3499,7 +3499,7 @@
   ]
  },
  "protected-areas": {
-  "service": "https://services.arcgis.com/8NxRqxz24n3Tl3kM/arcgis/rest/services/%C3%81reas_Protegidas/FeatureServer",
+  "service": "https://services.arcgis.com/8NxRqxz24n3Tl3kM/arcgis/rest/services/SINAP/FeatureServer",
   "layers": [
    {
     "id": 0,
@@ -3548,59 +3548,6 @@
     "geometry": "esriGeometryPoint",
     "bbox": null,
     "max": 1000
-   }
-  ]
- },
- "mining-concessions": {
-  "service": "https://services1.arcgis.com/OyjvVdFTl5hfSdX3/arcgis/rest/services/WGS84/FeatureServer",
-  "layers": [
-   {
-    "id": 0,
-    "name": "WGS84_Vertice",
-    "geometry": "esriGeometryPoint",
-    "bbox": [
-     -8395239,
-     -7475785,
-     -7378063,
-     -1979614
-    ],
-    "max": 2000
-   },
-   {
-    "id": 1,
-    "name": "WGS84_Pertenencia",
-    "geometry": "esriGeometryPolygon",
-    "bbox": [
-     -8084085,
-     -5274086,
-     -7683376,
-     -2133170
-    ],
-    "max": 2000
-   },
-   {
-    "id": 2,
-    "name": "WGS84_Concesion",
-    "geometry": "esriGeometryPolygon",
-    "bbox": [
-     -8395239,
-     -18369189,
-     -7378063,
-     -1979614
-    ],
-    "max": 2000
-   },
-   {
-    "id": 3,
-    "name": "WGS84_Demasia",
-    "geometry": "esriGeometryPolygon",
-    "bbox": [
-     -20037508,
-     -6756910,
-     20037508,
-     20036052
-    ],
-    "max": 2000
    }
   ]
  }

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.1 (2026-10-29)
+
+- **Protected Areas** reads the SBAP's `SINAP` service, the same layer of 246 areas: the SBAP
+  closed `Áreas_Protegidas`, which now asks for a token, so 0.5.0's layer read nothing. Its
+  ISO 19115 record is read again from the new service's item.
+- **Mining Concessions** goes: SERNAGEOMIN's `WGS84` service, the one copy of the mining
+  cadastre the plugin found public, was taken down, and no other public service of it was found.
+  The layer comes back when there is one; `filter`, `fields` and `max_scale` stay for it. The
+  Mining & Energy menu keeps the mining installations, the tailings cadastre and energy.
+- 62 layers.
+
 ## 0.5.0 (2026-10-23)
 
 - **Mining Concessions**: SERNAGEOMIN's mining cadastre, the exploration and exploitation

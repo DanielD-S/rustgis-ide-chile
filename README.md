@@ -24,9 +24,8 @@ however it is written, assign communes to points, and complete codes and names (
 - **Boundaries**: Regions, Communes (IDE MINAGRI)
 - **Resources**: **Soils & Agriculture ▾** (9): agrological soils, land use (CONAF), rural
   properties, irrigation, erosion, fruit cadastre, weather stations, summer pastures, hunting ban
-  areas; **Mining & Energy ▾** (4): SERNAGEOMIN's mining concessions in force (the mining
-  cadastre), mining installations and 2025 tailings cadastre, and the Ministry of Energy's power
-  plants, substations and transmission lines
+  areas; **Mining & Energy ▾** (3): SERNAGEOMIN's mining installations and 2025 tailings
+  cadastre, and the Ministry of Energy's power plants, substations and transmission lines
 - **Environment**: **Environment & Hazards ▾** (11): wildfires 2024–2025, SERNAGEOMIN's 2023
   volcanic risk ranking, the SBAP's protected areas, Ramsar wetlands, the MMA wetlands
   inventory, hydrography, basins, aquifer restrictions, the DGA's water scarcity decrees in force
@@ -79,23 +78,8 @@ falls back to the map image where there is one and otherwise gives the address t
   most ArcGIS services, 1,000 for the DGA's hydrometric network). When the view holds more, the
   plugin says the layer is incomplete: zoom in and choose it again.
 
-### The mining cadastre
-
-**Mining Concessions** reads SERNAGEOMIN's mining cadastre (its Departamento de Propiedad
-Minera's concessions layer): the exploration and exploitation concessions in force, constituted
-or in process, about 105,000 of the 594,000 the layer holds; the eliminated ones are left out
-(`SITUACION_CONCESION <> 'ELIMINADA'`). Each comes with its roll number, name, type, situation,
-hectares, expiry, holder's name, registration (number, folio, year) and commune. The holder's RUT
-isn't read: for a natural person it is personal data, and the name identifies the holder.
-
-A mining district holds tens of thousands of concessions in a view at 1:1,000,000 (about 20,000
-around Antofagasta, 17,000 around Copiapó, checked on 2026-10-23) and the service gives 2,000 to
-a request, so the layer is read at 1:100,000 or closer, where those views hold about 600 and
-1,200. SERNAGEOMIN publishes it for consultation and visualisation only: the legal record of a
-concession is the Conservador de Minas' registry.
-
 ```sh
-rustgis-cli run --plugin ide-chile-0.4.0.rgplugin   --cmd 'map.goToXY={"x":-70.65,"y":-33.45}' --cmd 'map.setScale={"scale":300000}'   --cmd 'plugin:ide-chile/communes'   --cmd 'plugin:ide-chile/soils'   --cmd 'plugin:ide-chile/census-2024-communes'   --cmd 'plugin:ide-chile/regions={"map":true}'   --cmd 'share.exportMap={"path":"santiago.png"}'
+rustgis-cli run --plugin ide-chile-0.5.1.rgplugin   --cmd 'map.goToXY={"x":-70.65,"y":-33.45}' --cmd 'map.setScale={"scale":300000}'   --cmd 'plugin:ide-chile/communes'   --cmd 'plugin:ide-chile/soils'   --cmd 'plugin:ide-chile/census-2024-communes'   --cmd 'plugin:ide-chile/regions={"map":true}'   --cmd 'share.exportMap={"path":"santiago.png"}'
 ```
 
 ## The CUT tools
@@ -155,7 +139,7 @@ in [`communes.json`](communes.json) with its source, layer and the day it was re
 run's last message says. On the command line:
 
 ```sh
-rustgis-cli run --plugin ide-chile-0.4.0.rgplugin   --cmd 'plugin:ide-chile/census-2024-communes'   --cmd 'gp.run={"tool":"plugin:ide-chile/join-cut","params":{"layer":"Censo 2024: comunas","table":"sinim_2024.csv"}}'   --cmd 'share.exportMap={"path":"ingresos.png"}'
+rustgis-cli run --plugin ide-chile-0.5.1.rgplugin   --cmd 'plugin:ide-chile/census-2024-communes'   --cmd 'gp.run={"tool":"plugin:ide-chile/join-cut","params":{"layer":"Censo 2024: comunas","table":"sinim_2024.csv"}}'   --cmd 'share.exportMap={"path":"ingresos.png"}'
 ```
 
 ## Sources and terms
@@ -169,7 +153,7 @@ its credit, and the data stays under its publisher's terms:
 | [IDE MINVU](https://ide.minvu.cl) | ArcGIS Server (`geoide.minvu.cl`) | urban limits, risk areas, heritage, urban wetlands, settlements, parks, housing deficit, bike lanes |
 | [INE](https://geoine-ine-chile.opendata.arcgis.com) | ArcGIS Online feature services | Census 2024, Census 2017 |
 | [Geoportal de Chile](https://www.geoportal.cl) | GeoServer WFS (`geoportal.cl/geoserver`) | wetlands (MMA), hydrography, basins, aquifers, climate zones, roads, railways, airports, schools, health, police, municipalities, capitals, tourism, street markets, sports, Sendero de Chile |
-| [SERNAGEOMIN](https://www.sernageomin.cl) | ArcGIS Online feature services | mining concessions (mining cadastre), mining installations, tailings cadastre 2025, volcanic risk ranking 2023 |
+| [SERNAGEOMIN](https://www.sernageomin.cl) | ArcGIS Online feature services | mining installations, tailings cadastre 2025, volcanic risk ranking 2023 |
 | [SBAP](https://sbap.gob.cl) | ArcGIS Online feature service (Sistema de Información de la Biodiversidad) | protected areas |
 | [DGA](https://dga.mop.gob.cl) | ArcGIS Online feature services | water scarcity decrees in force, hydrometric network 2026 |
 | [Ministry of Energy](https://ide-energia.minenergia.cl) | ArcGIS Server (`ide-energia.minenergia.cl`) | power plants, substations, transmission lines |
@@ -179,7 +163,9 @@ publisher's own ArcGIS organisation, and checked on 2026-10-23: each answers Geo
 geometry. The SBAP's protected areas are 56 MB whole, so they are read in the map view; the DGA's
 services on the Ministry of Public Works' server (`rest-sit.mop.gob.cl`) answer no GeoJSON, so the
 plugin reads the DGA's ArcGIS Online copies. SERNAGEOMIN and the SEA have no service in the
-catalogue, and Bienes Nacionales' GeoServer refused connections that day.
+catalogue, and Bienes Nacionales' GeoServer refused connections that day. In October 2026 the
+SBAP moved its protected areas to the `SINAP` service (the old `Áreas_Protegidas` asks for a
+token), and SERNAGEOMIN's mining concessions service was taken down, so 0.5.1 leaves them out.
 
 The Geoportal de Chile's WMS layers are published in EPSG:4326 only, which RustGIS's tile layers
 don't draw, so those layers are offered as features.
@@ -208,7 +194,7 @@ The records are read when the plugin is built (`python refresh.py metadata`, int
 read. On the command line:
 
 ```sh
-rustgis-cli run --plugin ide-chile-0.4.0.rgplugin   --cmd 'gp.run={"tool":"plugin:ide-chile/layer-metadata","params":{"layer":"Suelos agrológicos (CIREN)"}}'   --cmd 'share.exportTable={"table":"Metadata of Suelos agrológicos (CIREN)","path":"suelos-iso19115.csv"}'
+rustgis-cli run --plugin ide-chile-0.5.1.rgplugin   --cmd 'gp.run={"tool":"plugin:ide-chile/layer-metadata","params":{"layer":"Suelos agrológicos (CIREN)"}}'   --cmd 'share.exportTable={"table":"Metadata of Suelos agrológicos (CIREN)","path":"suelos-iso19115.csv"}'
 ```
 
 ## Permissions

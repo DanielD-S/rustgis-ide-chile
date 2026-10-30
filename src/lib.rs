@@ -555,11 +555,27 @@ mod tests {
         assert!(r[0].1.contains("/MapServer/9/query?"), "{}", r[0].1);
     }
 
+    /// A layer with its own filter, fields and closest scale: Mining Concessions as 0.5.0 read it,
+    /// before its service was taken down.
+    const CONCESSIONS: Entry = Entry {
+        id: "mining-concessions",
+        name: "Concesiones mineras vigentes (SERNAGEOMIN)",
+        tiles: "",
+        service: "https://services1.arcgis.com/OyjvVdFTl5hfSdX3/arcgis/rest/services/WGS84/FeatureServer",
+        kind: "arcgis",
+        layer: "",
+        subs: &[Sub { id: 2, name: "WGS84_Concesion", bbox: None, max: 2000 }],
+        whole: false,
+        credit: "SERNAGEOMIN, Departamento de Propiedad Minera (catastro minero)",
+        offset: 0.0001,
+        filter: "SITUACION_CONCESION <> 'ELIMINADA'",
+        fields: "NUMERO_ROL,DV_ROL,NOMBRE,TIPO_CONCESION,SITUACION_CONCESION,HECTAREAS,TITULAR_NOMBRE,COMUNA",
+        max_scale: 100_000.0,
+    };
+
     #[test]
-    fn concessions_are_read_filtered_and_close() {
-        let c = CATALOG.iter().find(|e| e.id == "mining-concessions").unwrap();
-        assert!(!c.whole && c.tiles.is_empty());
-        assert_eq!(c.max_scale, 100_000.0);
+    fn a_layer_is_read_filtered_and_close() {
+        let c = &CONCESSIONS;
         let v = view_of(&json!({"center": [-70.3, -27.4], "scale": 100000.0})).unwrap();
         let r = reads(c, Some(v));
         assert_eq!(r.len(), 1);

@@ -2712,69 +2712,6 @@
    ]
   },
   {
-   "entry": "mining-concessions",
-   "sub": null,
-   "source": "arcgis",
-   "elements": [
-    [
-     "MD_Metadata.fileIdentifier",
-     "8379a198129b4626a5b3bb51dbdc1ec1"
-    ],
-    [
-     "MD_Metadata.dateStamp",
-     "2026-05-20"
-    ],
-    [
-     "MD_Metadata.contact",
-     "SERNAGEOMIN, Departamento de Propiedad Minera (catastro minero)"
-    ],
-    [
-     "MD_Metadata.metadataStandardName",
-     "ISO 19115, elementos tomados del servicio ArcGIS REST (sin registro en el catálogo IDE Chile)"
-    ],
-    [
-     "CI_Citation.title",
-     "WGS84"
-    ],
-    [
-     "CI_Citation.date.creation",
-     "2026-05-20"
-    ],
-    [
-     "CI_Citation.date.revision",
-     "2026-05-20"
-    ],
-    [
-     "MD_DataIdentification.abstract",
-     "Catastro geoespacial de concesiones mineras vigentes y no vigentes en Chile de exploración y explotación. Las concesiones están identificadas con cada uno de sus vértices y contienen información como: Identificación de la concesión Número de rol y dígito verificador Nombre de la concesión Características generales Superficie en hectáreas Información legal Tipo de concesión Situación actual Datos de inscripción (número, fojas y año) Origen del registro Vigencia Fecha de vencimiento Ubicación Comuna asociada Sistema de referencia (datum y huso) Titularidad Nombre del titular RUT y dígito verificador División asociada Clasificación específica Condición de estacamento salitrero Información espacial Área y longitud de la geometría (calculadas automáticamente) Fechas de referencia Fecha de creación Fecha de última actualización"
-    ],
-    [
-     "MD_DataIdentification.pointOfContact",
-     "SERNAGEOMIN – Departamento de Planificación (Subdepartamento de Inteligencia de Datos) y Departamento de Propiedad Minera (pointOfContact)"
-    ],
-    [
-     "MD_ReferenceSystem.referenceSystemIdentifier",
-     "EPSG:4326"
-    ],
-    [
-     "EX_GeographicBoundingBox",
-     "W -180.0000, E 180.0000, S -83.5743, N 90.0000"
-    ],
-    [
-     "MD_LegalConstraints.otherConstraints",
-     "Términos de uso La información contenida en esta capa está destinada exclusivamente a fines de consulta, visualización y análisis referencial. Uso permitido Visualización de datos geográficos y atributos asociados Análisis exploratorio y generación de insumos referenciales Apoyo a estudios técnicos o académicos Restricciones No se permite la modificación, edición ni alteración de los datos No se autoriza su uso como fuente oficial para fines legales o administrativos No se garantiza su idoneidad para procesos de toma de decisiones críticas sin validación adicional Responsabilidad La información se entrega “tal cual” (as is), sin garantías explícitas o implícitas El responsable de la capa no asegura la actualización en tiempo real ni la ausencia de errores El uso de los datos es responsabilidad exclusiva del usuario Distribución Se permite compartir la información, siempre que se cite la fuente correspondiente No se debe redistribuir como producto oficial sin autorización Actualización Los datos pueden ser actualizados periódicamente sin previo aviso"
-    ],
-    [
-     "CI_OnlineResource.linkage",
-     "https://services1.arcgis.com/OyjvVdFTl5hfSdX3/arcgis/rest/services/WGS84/FeatureServer/2"
-    ],
-    [
-     "CI_OnlineResource.linkage",
-     "https://www.arcgis.com/home/item.html?id=8379a198129b4626a5b3bb51dbdc1ec1"
-    ]
-   ]
-  },
-  {
    "entry": "energy",
    "sub": 1,
    "source": "csw",
@@ -3316,11 +3253,11 @@
    "elements": [
     [
      "MD_Metadata.fileIdentifier",
-     "04cae8c11bf348f2beab3fa2c751dfa1"
+     "851ba6b7a67b4217b635b25f0e495f1c"
     ],
     [
      "MD_Metadata.dateStamp",
-     "2026-10-20"
+     "2026-10-27"
     ],
     [
      "MD_Metadata.contact",
@@ -3336,15 +3273,15 @@
     ],
     [
      "CI_Citation.date.creation",
-     "2026-08-11"
+     "2026-10-27"
     ],
     [
      "CI_Citation.date.revision",
-     "2026-10-14"
+     "2026-10-27"
     ],
     [
      "MD_DataIdentification.abstract",
-     "- Áreas Protegidas (AP): Espacio geográfico específico y delimitado, reconocido mediante decreto supremo del Ministerio del Medio Ambiente, con la finalidad de asegurar, en el presente y a largo plazo, la preservación y conservación de la biodiversidad del país, así como la protección del patrimonio natural, cultural y del valor paisajístico contenidos en dicho espacio: Reserva de Región Virgen: Áreas sin perturbación humana significativa, enfocadas en la preservación estricta de la integridad ecológica y la biodiversidad. No se permite la explotación comercial de recursos naturales. Parque Nacional: Áreas generalmente amplias, con ambientes naturales únicos y de gran interés. Su objetivo es la preservación del patrimonio natural y se prohíbe la explotación comercial de recursos. En ecosistemas marinos, solo se permiten actividades limitadas de investigación, educación o turismo a baja escala. Monumento Natural: Áreas más pequeñas, enfocadas en la preservación de componentes específicos de la biodiversidad o formaciones naturales de valor excepcional. La explotación comercial de recursos naturales está prohibida. Reserva Nacional: Áreas que protegen comunidades biológicas y ecosis…"
+     "¿En qué consiste la capa de áreas protegidas? La capa de áreas protegidas corresponde a la representación espacial digital georreferenciada de las áreas protegidas reconocidas por la legislación vigente. Constituye una herramienta destinada a apoyar la consulta, el análisis y la gestión de información territorial. Su desarrollo ha sido posible gracias a la incorporación progresiva de las técnicas de los Sistemas de Información Geográfica (SIG), las cuales han permitido generar, integrar y perfeccionar la capa digital de estas áreas. Previamente, esta información se encontraba disponible exclusivamente mediante cartografía impresa y planos en formato papel. Las primeras capas digitales de áreas protegidas surgieron a comienzos de la década de 2000, gracias al trabajo desarrollado por el Ministerio de Bienes Nacionales, institución que asumió la tarea de unificar la información geográfica disponible a nivel nacional. Este esfuerzo dio origen a la primera capa nacional en formato SIG correspondiente al entonces Sistema Nacional de Áreas Silvestres Protegidas del Estado (SNASPE). Desde entonces, este tipo de información ha sido objeto de mejoras continuas, aprovechando los avances en…"
     ],
     [
      "MD_DataIdentification.pointOfContact",
@@ -3360,15 +3297,15 @@
     ],
     [
      "MD_LegalConstraints.otherConstraints",
-     "Políticas y condiciones de uso La información espacial representa elementos territoriales sujetos a actualización continua. Este proceso considera mejoras cartográficas orientadas a optimizar la precisión, consistencia y calidad de los productos geoespaciales y la información de biodiversidad. El poblamiento de la información es de carácter dinámico; en consecuencia, los datos territoriales relativos a biodiversidad y áreas protegidas se incrementan, actualizan y perfeccionan progresivamente en el tiempo. La cartografía publicada en este visor que se refieren o relacionan con los límites y fronteras de Chile, no comprometen en modo alguno al Estado de Chile, de acuerdo con el artículo 2°, letra G del D.F.L. N° 83 de 1979, del Ministerio de Relaciones Exteriores. La representación de las coberturas de biodiversidad y áreas protegidas se ajusta a una escala de 1:50.000 a menos que la capa indique otra escala en su metadata. En el caso de áreas protegidas, la información contenida en el geoportal no modifica ni sustituye la información y cartografía contenida en sus respectivos decretos y planos oficiales. Fuentes de Información La información que compone esta capa actualmente provie…"
+     "Políticas y condiciones de uso La información espacial representa elementos territoriales sujetos a actualización continua. Este proceso considera mejoras cartográficas orientadas a optimizar la precisión, consistencia y calidad de los productos geoespaciales y la información de biodiversidad. El poblamiento de la información es de carácter dinámico; en consecuencia, los datos territoriales relativos a biodiversidad y áreas protegidas se incrementan, actualizan y perfeccionan progresivamente en el tiempo. La cartografía publicada en este visor que se refieren o relacionan con los límites y fronteras de Chile, no comprometen en modo alguno al Estado de Chile, de acuerdo con el artículo 2°, letra G del D.F.L. N° 83 de 1979, del Ministerio de Relaciones Exteriores. La representación de las coberturas de biodiversidad y áreas protegidas se ajusta a una escala de 1:50.000 a menos que la capa indique otra escala en su metadata. En el caso de áreas protegidas, la información contenida en el geoportal no modifica ni sustituye la información y cartografía contenida en sus respectivos decretos y planos oficiales."
     ],
     [
      "CI_OnlineResource.linkage",
-     "https://services.arcgis.com/8NxRqxz24n3Tl3kM/arcgis/rest/services/%C3%81reas_Protegidas/FeatureServer/0"
+     "https://services.arcgis.com/8NxRqxz24n3Tl3kM/arcgis/rest/services/SINAP/FeatureServer/0"
     ],
     [
      "CI_OnlineResource.linkage",
-     "https://www.arcgis.com/home/item.html?id=04cae8c11bf348f2beab3fa2c751dfa1"
+     "https://www.arcgis.com/home/item.html?id=851ba6b7a67b4217b635b25f0e495f1c"
     ]
    ]
   },
