@@ -225,6 +225,21 @@ cargo fmt`; a new layer's service alone with `python refresh.py services <id>`).
 a commune of the division, that every string has its Spanish, and run the three tools on small
 layers and tables. CI fails when the generated files don't match the table.
 
+## Services check
+
+The layers are other institutions' services, and they move or close without notice: in October
+2026 the SBAP's protected areas went behind a token and SERNAGEOMIN's mining concessions went
+away. Every Monday the **Services** workflow runs [`scripts/check_services.py`](scripts/check_services.py),
+which sends each layer's own request (built by [`examples/probes.rs`](examples/probes.rs) with the
+plugin's code) cut to one feature, and asks for each map image over Santiago. A feature must come
+back as GeoJSON with its geometry; a request that fails is tried twice more before it counts.
+When something fails, the workflow opens an issue with the report, keeps it up to date, and
+closes it when every service answers again. To run it here:
+
+```sh
+python scripts/check_services.py --report report.md
+```
+
 ## Release
 
 The plugin is listed in the [RustGIS plugin registry](https://plugins.rustgis.app) from this
