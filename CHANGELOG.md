@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.1 (2026-11-01)
+
+- The catalogue's **Add Layer** and **Add Map Image** buttons sit under the tree, over the
+  chosen layer's description: in a short window, a long description pushed them out of sight.
+
 ## 0.6.0 (2026-11-01)
 
 - **IDE Chile Catalogue**, a panel: every layer in a tree of the tab's themes, with a search box

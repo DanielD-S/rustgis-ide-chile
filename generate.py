@@ -231,12 +231,14 @@ PANEL = {
     "icon": "catalog",
     "help": "Every layer by theme, with search: choose one to read about it, then add it.",
     "state": "catalogue",
+    # The buttons sit under the tree, over the description: a long description in a short window
+    # would push them out of sight (0.6.1).
     "items": [
         {"kind": "tree", "id": "layer", "label": "Layers", "search": True, "command": "catalogue",
          "help": "Type to search the layers; choose one to read about it."},
-        {"kind": "text", "id": "info", "label": "Chosen layer", "text": "Choose a layer, or search for one."},
         {"kind": "button", "command": "catalogue-add"},
         {"kind": "button", "command": "catalogue-map"},
+        {"kind": "text", "id": "info", "label": "Chosen layer", "text": "Choose a layer, or search for one."},
     ],
 }
 PANEL_COMMANDS = [
@@ -271,7 +273,7 @@ PANEL_MESSAGES = {
 
 PARAMS = '{"map"?: bool (the service\'s own map image as a web tile layer under the layers, instead of the features)}'
 
-VERSION = "0.6.0"
+VERSION = "0.6.1"
 DESCRIPTION = "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, the INE's Censuses 2024 and 2017, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names; Layer Metadata shows each layer's ISO 19115 record from the IDE Chile catalogue."
 DESCRIPTION_ES = "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, los Censos 2024 y 2017 del INE, SERNAGEOMIN, SBAP, DGA y el Ministerio de Energía. Límites, suelos, uso de la tierra, humedales, áreas protegidas, agua, minería, energía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables. Las herramientas CUT unen cualquier tabla de Chile a sus comunas, provincias o regiones por su código único territorial, asignan comunas a puntos y completan códigos y nombres; Metadatos de la capa muestra el registro ISO 19115 de cada capa del catálogo de IDE Chile."
 

@@ -1,7 +1,7 @@
 {
   "id": "ide-chile",
   "name": "IDE Chile",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, the INE's Censuses 2024 and 2017, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names; Layer Metadata shows each layer's ISO 19115 record from the IDE Chile catalogue.",
   "author": "Daniel Díaz",
   "homepage": "https://github.com/DanielD-S/rustgis-ide-chile",
@@ -875,18 +875,18 @@
         "help": "Type to search the layers; choose one to read about it."
       },
       {
-        "kind": "text",
-        "id": "info",
-        "label": "Chosen layer",
-        "text": "Choose a layer, or search for one."
-      },
-      {
         "kind": "button",
         "command": "catalogue-add"
       },
       {
         "kind": "button",
         "command": "catalogue-map"
+      },
+      {
+        "kind": "text",
+        "id": "info",
+        "label": "Chosen layer",
+        "text": "Choose a layer, or search for one."
       }
     ]
   },

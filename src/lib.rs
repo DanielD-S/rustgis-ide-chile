@@ -448,7 +448,8 @@ mod tests {
             (Some("catalogue"), Some(panel::TREE), Some("tree"))
         );
         let widgets: Vec<&str> = p["items"].as_array().unwrap().iter().filter_map(|w| w["id"].as_str().or(w["command"].as_str())).collect();
-        assert_eq!(widgets, [panel::TREE, "info", panel::ADD, panel::MAP]);
+        // The buttons over the description, so a long one doesn't push them out of sight.
+        assert_eq!(widgets, [panel::TREE, panel::ADD, panel::MAP, "info"]);
         // Every item of the tab is a command or a tool, and every tool is handled.
         let ids: Vec<&str> = manifest["commands"].as_array().unwrap().iter().filter_map(|c| c["id"].as_str()).collect();
         let tools: Vec<String> =

@@ -62,7 +62,7 @@ Chile from 0.6.0 on. Its buttons are commands too: scripts and the command line 
 with `{"layer": "<command id>"}`, and without it they add the layer chosen in the panel:
 
 ```sh
-rustgis-cli run --plugin ide-chile-0.6.0.rgplugin   --cmd 'plugin:ide-chile/catalogue-add={"layer":"census-2024-regions"}'
+rustgis-cli run --plugin ide-chile-0.6.1.rgplugin   --cmd 'plugin:ide-chile/catalogue-add={"layer":"census-2024-regions"}'
 ```
 
 ## Features, read whole or in the map view
