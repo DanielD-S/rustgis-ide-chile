@@ -8,7 +8,8 @@
   Command Search.
 - Needs RustGIS 0.5.0 or later, the first with trees in plugin panels. Older RustGIS keeps 0.5.1.
 - Three commands for the panel: `catalogue` (its state), `catalogue-add` and `catalogue-map`,
-  which scripts run with `{"panel": {"layer": "<command id>"}}`. 66 commands.
+  which scripts run with `{"layer": "<command id>"}` (without it, the layer chosen in the panel).
+  66 commands.
 
 ## 0.5.1 (2026-10-29)
 

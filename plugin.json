@@ -468,14 +468,14 @@
       "label": "Add Layer",
       "help": "Adds the layer chosen in the catalogue, as features.",
       "icon": "add_data",
-      "params": "{\"panel\"?: {\"layer\": \"<the command id of a layer>\"}}"
+      "params": "{\"layer\"?: \"<the command id of a layer; without it, the layer chosen in the panel>\"}"
     },
     {
       "id": "catalogue-map",
       "label": "Add Map Image",
       "help": "Adds the map image of the layer chosen in the catalogue under the layers, or takes it away.",
       "icon": "basemap",
-      "params": "{\"panel\"?: {\"layer\": \"<the command id of a layer>\"}}"
+      "params": "{\"layer\"?: \"<the command id of a layer; without it, the layer chosen in the panel>\"}"
     }
   ],
   "tools": [

@@ -58,11 +58,11 @@ Layer** adds its features and **Add Map Image** its map image, where it has one 
 to take it away). Each theme shows how many layers it holds.
 
 The panel needs RustGIS 0.5.0 or later, the first with trees in plugin panels, and so does IDE
-Chile from 0.6.0 on. Its buttons are commands too: scripts and the command line choose the layer
-with `{"panel": {"layer": "<command id>"}}`:
+Chile from 0.6.0 on. Its buttons are commands too: scripts and the command line name the layer
+with `{"layer": "<command id>"}`, and without it they add the layer chosen in the panel:
 
 ```sh
-rustgis-cli run --plugin ide-chile-0.6.0.rgplugin   --cmd 'plugin:ide-chile/catalogue-add={"panel":{"layer":"census-2024-regions"}}'
+rustgis-cli run --plugin ide-chile-0.6.0.rgplugin   --cmd 'plugin:ide-chile/catalogue-add={"layer":"census-2024-regions"}'
 ```
 
 ## Features, read whole or in the map view

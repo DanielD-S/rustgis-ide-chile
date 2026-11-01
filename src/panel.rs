@@ -37,9 +37,12 @@ impl Words {
     }
 }
 
-/// The layer chosen in the panel, for its buttons.
+/// The layer the buttons add: the `layer` parameter's (a script's), else the panel's chosen one.
+/// A script can set the panel's value too, but RustGIS keeps a tree's value only among its
+/// nodes, which the tree has once the panel has opened.
 pub fn chosen(req: &Request, words: &Words) -> Result<&'static Entry, String> {
-    req.panel_str(TREE)
+    req.str(TREE)
+        .or_else(|| req.panel_str(TREE))
         .and_then(|id| CATALOG.iter().find(|e| e.id == id))
         .ok_or_else(|| words.tr("Choose a layer in the catalogue first.", &[]))
 }
@@ -210,5 +213,9 @@ mod tests {
         }
         let req = request(MAP, "en", json!({"layer": "wetlands"}), &[]);
         assert_eq!(chosen(&req, &Words::new(&req)).unwrap().id, "wetlands");
+        // A script's `layer` parameter comes before the panel's.
+        let mut req = request(ADD, "en", json!({"layer": "wetlands"}), &[]);
+        req.params = json!({"layer": "census-2024-regions"});
+        assert_eq!(chosen(&req, &Words::new(&req)).unwrap().id, "census-2024-regions");
     }
 }

@@ -241,8 +241,8 @@ PANEL = {
 }
 PANEL_COMMANDS = [
     {"id": "catalogue", "label": "Catalogue", "help": "Lists the layers by theme in the IDE Chile Catalogue panel and describes the one chosen.", "icon": "catalog", "params": "{}"},
-    {"id": "catalogue-add", "label": "Add Layer", "help": "Adds the layer chosen in the catalogue, as features.", "icon": "add_data", "params": '{"panel"?: {"layer": "<the command id of a layer>"}}'},
-    {"id": "catalogue-map", "label": "Add Map Image", "help": "Adds the map image of the layer chosen in the catalogue under the layers, or takes it away.", "icon": "basemap", "params": '{"panel"?: {"layer": "<the command id of a layer>"}}'},
+    {"id": "catalogue-add", "label": "Add Layer", "help": "Adds the layer chosen in the catalogue, as features.", "icon": "add_data", "params": '{"layer"?: "<the command id of a layer; without it, the layer chosen in the panel>"}'},
+    {"id": "catalogue-map", "label": "Add Map Image", "help": "Adds the map image of the layer chosen in the catalogue under the layers, or takes it away.", "icon": "basemap", "params": '{"layer"?: "<the command id of a layer; without it, the layer chosen in the panel>"}'},
 ]
 PANEL_ES = {
     "IDE Chile Catalogue": "Catálogo IDE Chile",
