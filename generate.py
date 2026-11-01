@@ -219,12 +219,59 @@ TAB = [
     ("Census", "Censo", [("Census 2024", "Censo 2024", "stats", "Census 2024 boundaries, indicators and neighbourhood units (INE).", "Límites, indicadores y unidades vecinales del Censo 2024 (INE).", ["census-2024-regions", "census-2024-provinces", "census-2024-communes", "census-2024-commune-indicators", "census-2024-region-indicators", "census-2024-neighbourhoods"]), ("Census 2017", "Censo 2017", "stats", "Census 2017 figures and microdata (INE).", "Cifras y microdatos del Censo 2017 (INE).", ["census-regions", "census-provinces", "census-communes", "census-blocks", "census-localities", "census-cities", "census-towns", "census-villages", "census-hamlets"])]),
     ("Services", "Servicios", [("Transport & Services", "Transporte y servicios", "point_layer", "Roads, railways, airports, schools, health, police and tourism (Geoportal de Chile).", "Red vial, ferrocarriles, aeródromos, escuelas, salud, Carabineros y turismo (Geoportal de Chile).", ["roads", "railways", "airports", "schools", "preschools", "higher-education", "health-services", "police", "municipalities", "capitals", "tourist-attractions", "street-markets", "sports", "sendero"])]),
     ("CUT", "CUT", ["tool:join-cut", "tool:assign-cut", "tool:complete-cut"]),
-    ("Manage", "Gestionar", ["tool:layer-metadata", "about"]),
+    ("Manage", "Gestionar", ["panel", "tool:layer-metadata", "about"]),
 ]
+
+# The catalogue panel (0.6.0): the layers in a tree of the tab's themes, with RustGIS's search
+# box over it; the chosen layer described, added as features or as its map image. The tree's
+# command answers the panel's state too: opened, it gives the nodes; a node chosen, the text and
+# the buttons. Trees came with RustGIS 0.5.0, which is why the plugin needs it.
+PANEL = {
+    "title": "IDE Chile Catalogue",
+    "icon": "catalog",
+    "help": "Every layer by theme, with search: choose one to read about it, then add it.",
+    "state": "catalogue",
+    "items": [
+        {"kind": "tree", "id": "layer", "label": "Layers", "search": True, "command": "catalogue",
+         "help": "Type to search the layers; choose one to read about it."},
+        {"kind": "text", "id": "info", "label": "Chosen layer", "text": "Choose a layer, or search for one."},
+        {"kind": "button", "command": "catalogue-add"},
+        {"kind": "button", "command": "catalogue-map"},
+    ],
+}
+PANEL_COMMANDS = [
+    {"id": "catalogue", "label": "Catalogue", "help": "Lists the layers by theme in the IDE Chile Catalogue panel and describes the one chosen.", "icon": "catalog", "params": "{}"},
+    {"id": "catalogue-add", "label": "Add Layer", "help": "Adds the layer chosen in the catalogue, as features.", "icon": "add_data", "params": '{"layer"?: "<the command id of a layer; without it, the layer chosen in the panel>"}'},
+    {"id": "catalogue-map", "label": "Add Map Image", "help": "Adds the map image of the layer chosen in the catalogue under the layers, or takes it away.", "icon": "basemap", "params": '{"layer"?: "<the command id of a layer; without it, the layer chosen in the panel>"}'},
+]
+PANEL_ES = {
+    "IDE Chile Catalogue": "Catálogo IDE Chile",
+    "Every layer by theme, with search: choose one to read about it, then add it.": "Todas las capas por tema, con búsqueda: elija una para leer sobre ella y luego añádala.",
+    "Layers": "Capas",
+    "Type to search the layers; choose one to read about it.": "Escriba para buscar capas; elija una para leer sobre ella.",
+    "Chosen layer": "Capa elegida",
+    "Choose a layer, or search for one.": "Elija una capa, o búsquela.",
+    "Catalogue": "Catálogo",
+    "Lists the layers by theme in the IDE Chile Catalogue panel and describes the one chosen.": "Lista las capas por tema en el panel Catálogo IDE Chile y describe la elegida.",
+    "Add Layer": "Añadir capa",
+    "Adds the layer chosen in the catalogue, as features.": "Añade la capa elegida en el catálogo, como entidades.",
+    "Add Map Image": "Añadir imagen de mapa",
+    "Adds the map image of the layer chosen in the catalogue under the layers, or takes it away.": "Añade la imagen de mapa de la capa elegida en el catálogo bajo las capas, o la quita.",
+}
+# What the panel's text says (src/panel.rs).
+PANEL_MESSAGES = {
+    "Choose a layer in the catalogue first.": "Elija primero una capa en el catálogo.",
+    "{theme}: {n} layers. Choose one to read about it.": "{theme}: {n} capas. Elija una para leer sobre ella.",
+    "Dataset: {name}": "Conjunto de datos: {name}",
+    "Source: {credit}": "Fuente: {credit}",
+    "Read whole, in one download.": "Se lee completa, en una descarga.",
+    "Read in the map view at 1:{scale} or closer, up to {n} features at a time.": "Se lee en la vista del mapa a 1:{scale} o más cerca, hasta {n} entidades por vez.",
+    "It also has a map image.": "También tiene imagen de mapa.",
+}
 
 PARAMS = '{"map"?: bool (the service\'s own map image as a web tile layer under the layers, instead of the features)}'
 
-VERSION = "0.5.1"
+VERSION = "0.6.0"
 DESCRIPTION = "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, the INE's Censuses 2024 and 2017, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names; Layer Metadata shows each layer's ISO 19115 record from the IDE Chile catalogue."
 DESCRIPTION_ES = "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, los Censos 2024 y 2017 del INE, SERNAGEOMIN, SBAP, DGA y el Ministerio de Energía. Límites, suelos, uso de la tierra, humedales, áreas protegidas, agua, minería, energía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables. Las herramientas CUT unen cualquier tabla de Chile a sus comunas, provincias o regiones por su código único territorial, asignan comunas a puntos y completan códigos y nombres; Metadatos de la capa muestra el registro ISO 19115 de cada capa del catálogo de IDE Chile."
 
@@ -624,6 +671,44 @@ def communes_rs():
     return len(rows), len(provinces), len(regions)
 
 
+def slug(s):
+    return "-".join("".join(c if c.isalnum() else " " for c in s.lower()).split())
+
+
+def themes_rs():
+    """The catalogue panel's themes as Rust: each group of the tab with its layers, its menus as
+    themes of their own. A group that is one menu is that menu (Environment is Environment &
+    Hazards), and the groups without layers (the CUT tools, Manage) are left out."""
+    by_id = {e["id"]: e for e in LAYERS}
+
+    def s(x):
+        return json.dumps(x, ensure_ascii=False)
+
+    def layer(i):
+        e = by_id[i]
+        return f"Item::Layer {{ id: {s(i)}, label: {s(e['en'])}, help: {s(e['help_en'])} }}"
+
+    def theme(label, items):
+        return f"Theme {{ id: {s('theme-' + slug(label))}, label: {s(label)}, items: &[{', '.join(items)}] }}"
+
+    out, seen = [], []
+    for en, _, items in TAB:
+        if len(items) == 1 and isinstance(items[0], tuple):
+            en, items = items[0][0], items[0][5]
+        parts = []
+        for it in items:
+            if isinstance(it, tuple):
+                parts.append(f"Item::Theme({theme(it[0], [layer(i) for i in it[5]])})")
+                seen += it[5]
+            elif it in by_id:
+                parts.append(layer(it))
+                seen.append(it)
+        if parts:
+            out.append(theme(en, parts))
+    assert sorted(seen) == sorted(by_id), "every layer once in the tree"
+    return out
+
+
 def command(e):
     return {"id": e["id"], "label": e["en"], "help": e["help_en"], "icon": e["icon"], "params": PARAMS}
 
@@ -635,7 +720,7 @@ def main():
     assert not missing, f"no layers read for {missing}: run python refresh.py services {' '.join(missing)}"
     commands = [command(e) for e in LAYERS] + [
         {"id": "about", "label": "About IDE Chile", "help": "The sources behind the layers.", "icon": "help", "params": "{}"},
-    ]
+    ] + PANEL_COMMANDS
     es = {}
     for e in LAYERS:
         es[e["en"]] = e["es"]
@@ -647,6 +732,8 @@ def main():
         DESCRIPTION: DESCRIPTION_ES,
     })
     es.update(MESSAGES)
+    es.update(PANEL_ES)
+    es.update(PANEL_MESSAGES)
     tools = []
     for t, t_es in TOOLS + [METADATA_TOOL]:
         tools.append(t)
@@ -675,7 +762,7 @@ def main():
                     assert i in ids, i
                 out.append({"menu": menu_en, "icon": icon, "help": help_en, "items": entries})
             else:
-                assert it in ids or it == "about" or it in tool_ids, it
+                assert it in ids or it in ("about", "panel") or it in tool_ids, it
                 out.append(it)
         groups.append({"label": en, "items": out})
     assert 1 <= len(groups) <= 8, f"RustGIS takes 1 to 8 groups on a tab, not {len(groups)}"
@@ -691,12 +778,13 @@ def main():
         "license": "MIT",
         "entry": "plugin.wasm",
         "abi": 1,
-        # 0.3.0 brought layer.addUrl to plugins and files to their tools.
-        "minRustgisVersion": "0.3.0",
+        # 0.3.0 brought layer.addUrl to plugins and files to their tools; 0.5.0, trees in panels.
+        "minRustgisVersion": "0.5.0",
         "permissions": ["edit", "files", "network"],
         "commands": commands,
         "tools": tools,
         "tab": {"label": "IDE Chile", "groups": groups},
+        "panel": PANEL,
         "i18n": {"es": es},
     }
     (root / "plugin.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -716,7 +804,8 @@ def main():
         rows.append(
             f"    Entry {{ id: {s(e['id'])}, name: {s(e['name'])}, tiles: {s(e['tiles'])}, service: {s(e['service'])}, kind: {s(e['kind'])}, layer: {s(e['layer'])}, subs: {subs}, whole: {'true' if e['whole'] else 'false'}, credit: {s(e['credit'])}, offset: {e['offset']!r}, filter: {s(e['filter'])}, fields: {s(e['fields'])}, max_scale: {float(e['max_scale'])!r} }},"
         )
-    rs = "//! The layer catalog. Generated by `generate.py`: edit the table there, not this file.\n\nuse crate::{Entry, Sub};\n\n/// Every layer the plugin offers, in ribbon order.\npub const CATALOG: &[Entry] = &[\n" + "\n".join(rows) + "\n];\n"
+    rs = "//! The layer catalog. Generated by `generate.py`: edit the table there, not this file.\n\nuse crate::{Entry, Item, Sub, Theme};\n\n/// Every layer the plugin offers, in ribbon order.\npub const CATALOG: &[Entry] = &[\n" + "\n".join(rows) + "\n];\n"
+    rs += "\n/// The catalogue panel's tree: the tab's groups and menus with their layers.\npub const THEMES: &[Theme] = &[\n" + "\n".join(f"    {t}," for t in themes_rs()) + "\n];\n"
     (root / "src" / "catalog.rs").write_text(rs, encoding="utf-8")
     print(f"{len(LAYERS)} layers, {len(commands)} commands, {len(tools)} tools, {len(es)} Spanish strings; {n_communes} communes, {n_provinces} provinces, {n_regions} regions; {n_records} metadata records ({n_csw} from the catalogue)")
 
