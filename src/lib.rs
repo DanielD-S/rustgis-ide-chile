@@ -25,8 +25,9 @@ mod communes;
 pub mod cut;
 pub mod iso;
 mod metadata;
+pub mod panel;
 
-pub use catalog::CATALOG;
+pub use catalog::{CATALOG, THEMES};
 
 /// `plugin.json`, for its translations.
 pub(crate) const MANIFEST: &str = include_str!("../plugin.json");
@@ -77,6 +78,23 @@ pub struct Sub {
     pub max: u32,
 }
 
+/// A theme of the catalogue panel's tree: a group of the tab, or one of its menus.
+#[derive(Debug)]
+pub struct Theme {
+    /// The tree node's id, `theme-…`.
+    pub id: &'static str,
+    /// Its label in English, translated by the manifest.
+    pub label: &'static str,
+    pub items: &'static [Item],
+}
+
+/// What a theme holds: a layer (its command's id, label and help) or a theme.
+#[derive(Debug)]
+pub enum Item {
+    Layer { id: &'static str, label: &'static str, help: &'static str },
+    Theme(Theme),
+}
+
 /// The most features one read in the map view brings (ArcGIS servers stop at 2,000 anyway).
 const IN_VIEW: u32 = 5000;
 
@@ -93,6 +111,14 @@ pub(crate) fn handle(req: Request) -> Result<Value, String> {
     }
     match req.id.as_str() {
         "about" => about(&req),
+        "catalogue" => {
+            let words = panel::Words::new(&req);
+            Ok(json!({"panel": Value::from(panel::state(&req, &words))}))
+        }
+        panel::ADD | panel::MAP => {
+            let words = panel::Words::new(&req);
+            choose(&req, panel::chosen(&req, &words)?, req.id == panel::MAP)
+        }
         other => Err(format!("IDE Chile has no command '{other}'")),
     }
 }
@@ -411,22 +437,30 @@ mod tests {
             }
         }
         for c in commands {
-            assert!(CATALOG.iter().any(|e| e.id == c) || c == "about", "{c} isn't handled");
+            assert!(CATALOG.iter().any(|e| e.id == c) || ["about", "catalogue", panel::ADD, panel::MAP].contains(&c), "{c} isn't handled");
         }
         assert_eq!(manifest["permissions"], json!(["edit", "files", "network"]));
-        assert_eq!(manifest["minRustgisVersion"], "0.3.0");
+        // Trees in panels came with RustGIS 0.5.0.
+        assert_eq!(manifest["minRustgisVersion"], "0.5.0");
+        let p = &manifest["panel"];
+        assert_eq!(
+            (p["state"].as_str(), p["items"][0]["id"].as_str(), p["items"][0]["kind"].as_str()),
+            (Some("catalogue"), Some(panel::TREE), Some("tree"))
+        );
+        let widgets: Vec<&str> = p["items"].as_array().unwrap().iter().filter_map(|w| w["id"].as_str().or(w["command"].as_str())).collect();
+        assert_eq!(widgets, [panel::TREE, "info", panel::ADD, panel::MAP]);
         // Every item of the tab is a command or a tool, and every tool is handled.
         let ids: Vec<&str> = manifest["commands"].as_array().unwrap().iter().filter_map(|c| c["id"].as_str()).collect();
         let tools: Vec<String> =
             manifest["tools"].as_array().unwrap().iter().map(|t| format!("tool:{}", t["id"].as_str().unwrap())).collect();
         assert_eq!(tools, ["tool:join-cut", "tool:assign-cut", "tool:complete-cut", "tool:layer-metadata"]);
-        // RustGIS takes at most 64 commands, and 64 choices in a list: the metadata tool lists
-        // every layer.
-        assert!(ids.len() <= 64 && CATALOG.len() <= 64, "{} commands, {} layers", ids.len(), CATALOG.len());
+        // RustGIS 0.4.0 and later take 256 commands, and 64 choices in a list: the metadata tool
+        // lists every layer.
+        assert!(ids.len() <= 256 && CATALOG.len() <= 64, "{} commands, {} layers", ids.len(), CATALOG.len());
         for g in manifest["tab"]["groups"].as_array().unwrap() {
             for it in g["items"].as_array().unwrap() {
                 match it {
-                    Value::String(id) => assert!(ids.contains(&id.as_str()) || tools.contains(id), "{id}"),
+                    Value::String(id) => assert!(ids.contains(&id.as_str()) || tools.contains(id) || id == "panel", "{id}"),
                     menu => {
                         for id in menu["items"].as_array().unwrap() {
                             assert!(ids.contains(&id.as_str().unwrap()), "{id}");
@@ -487,6 +521,27 @@ mod tests {
         }
         for g in manifest["tab"]["groups"].as_array().unwrap() {
             assert!(es.contains_key(g["label"].as_str().unwrap()), "{}", g["label"]);
+        }
+        // The panel: its title, help and widgets, and the themes and layers of its tree.
+        let p = &manifest["panel"];
+        let mut panel: Vec<&str> = vec![p["title"].as_str().unwrap(), p["help"].as_str().unwrap()];
+        for w in p["items"].as_array().unwrap() {
+            panel.extend(["label", "help", "text"].iter().filter_map(|k| w[*k].as_str()));
+        }
+        fn themes<'a>(ts: &'a [Theme], out: &mut Vec<&'a str>) {
+            for t in ts {
+                out.push(t.label);
+                for i in t.items {
+                    match i {
+                        Item::Layer { label, help, .. } => out.extend([*label, *help]),
+                        Item::Theme(t) => themes(std::slice::from_ref(t), out),
+                    }
+                }
+            }
+        }
+        themes(THEMES, &mut panel);
+        for s in panel {
+            assert!(es.contains_key(s), "no Spanish for {s:?}");
         }
         // The INE's field names the tools write are what the Census 2024 layers carry.
         assert_eq!(cut::Place::field_names(cut::Level::Commune), ["CUT", "COMUNA", "COD_PROVINCIA", "PROVINCIA", "COD_REGION", "REGION"]);

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (2026-11-01)
+
+- **IDE Chile Catalogue**, a panel: every layer in a tree of the tab's themes, with a search box
+  over it. Choose a layer to read its description, dataset, source and how it is read; **Add
+  Layer** adds its features and **Add Map Image** its map image. On the tab's Manage group and in
+  Command Search.
+- Needs RustGIS 0.5.0 or later, the first with trees in plugin panels. Older RustGIS keeps 0.5.1.
+- Three commands for the panel: `catalogue` (its state), `catalogue-add` and `catalogue-map`,
+  which scripts run with `{"panel": {"layer": "<command id>"}}`. 66 commands.
+
 ## 0.5.1 (2026-10-29)
 
 - **Protected Areas** reads the SBAP's `SINAP` service, the same layer of 246 areas: the SBAP

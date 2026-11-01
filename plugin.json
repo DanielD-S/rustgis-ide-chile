@@ -1,14 +1,14 @@
 {
   "id": "ide-chile",
   "name": "IDE Chile",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, the INE's Censuses 2024 and 2017, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names; Layer Metadata shows each layer's ISO 19115 record from the IDE Chile catalogue.",
   "author": "Daniel Díaz",
   "homepage": "https://github.com/DanielD-S/rustgis-ide-chile",
   "license": "MIT",
   "entry": "plugin.wasm",
   "abi": 1,
-  "minRustgisVersion": "0.3.0",
+  "minRustgisVersion": "0.5.0",
   "permissions": [
     "edit",
     "files",
@@ -455,6 +455,27 @@
       "help": "The sources behind the layers.",
       "icon": "help",
       "params": "{}"
+    },
+    {
+      "id": "catalogue",
+      "label": "Catalogue",
+      "help": "Lists the layers by theme in the IDE Chile Catalogue panel and describes the one chosen.",
+      "icon": "catalog",
+      "params": "{}"
+    },
+    {
+      "id": "catalogue-add",
+      "label": "Add Layer",
+      "help": "Adds the layer chosen in the catalogue, as features.",
+      "icon": "add_data",
+      "params": "{\"panel\"?: {\"layer\": \"<the command id of a layer>\"}}"
+    },
+    {
+      "id": "catalogue-map",
+      "label": "Add Map Image",
+      "help": "Adds the map image of the layer chosen in the catalogue under the layers, or takes it away.",
+      "icon": "basemap",
+      "params": "{\"panel\"?: {\"layer\": \"<the command id of a layer>\"}}"
     }
   ],
   "tools": [
@@ -832,9 +853,40 @@
       {
         "label": "Manage",
         "items": [
+          "panel",
           "tool:layer-metadata",
           "about"
         ]
+      }
+    ]
+  },
+  "panel": {
+    "title": "IDE Chile Catalogue",
+    "icon": "catalog",
+    "help": "Every layer by theme, with search: choose one to read about it, then add it.",
+    "state": "catalogue",
+    "items": [
+      {
+        "kind": "tree",
+        "id": "layer",
+        "label": "Layers",
+        "search": true,
+        "command": "catalogue",
+        "help": "Type to search the layers; choose one to read about it."
+      },
+      {
+        "kind": "text",
+        "id": "info",
+        "label": "Chosen layer",
+        "text": "Choose a layer, or search for one."
+      },
+      {
+        "kind": "button",
+        "command": "catalogue-add"
+      },
+      {
+        "kind": "button",
+        "command": "catalogue-map"
       }
     ]
   },
@@ -978,6 +1030,25 @@
       "Added {n} layers of {name} in the map view.": "Añadidas {n} capas de {name} en la vista del mapa.",
       "Nothing of {name} reaches the map view.": "Nada de {name} llega a la vista del mapa.",
       "IDE Chile: {n} layers from Geoportal de Chile, IDE MINAGRI, IDE MINVU, INE, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Each layer's credit names its source; Layer Metadata shows its ISO 19115 record.": "IDE Chile: {n} capas del Geoportal de Chile, IDE MINAGRI, IDE MINVU, INE, SERNAGEOMIN, SBAP, DGA y el Ministerio de Energía. El crédito de cada capa nombra su fuente; Metadatos de la capa muestra su registro ISO 19115.",
+      "IDE Chile Catalogue": "Catálogo IDE Chile",
+      "Every layer by theme, with search: choose one to read about it, then add it.": "Todas las capas por tema, con búsqueda: elija una para leer sobre ella y luego añádala.",
+      "Layers": "Capas",
+      "Type to search the layers; choose one to read about it.": "Escriba para buscar capas; elija una para leer sobre ella.",
+      "Chosen layer": "Capa elegida",
+      "Choose a layer, or search for one.": "Elija una capa, o búsquela.",
+      "Catalogue": "Catálogo",
+      "Lists the layers by theme in the IDE Chile Catalogue panel and describes the one chosen.": "Lista las capas por tema en el panel Catálogo IDE Chile y describe la elegida.",
+      "Add Layer": "Añadir capa",
+      "Adds the layer chosen in the catalogue, as features.": "Añade la capa elegida en el catálogo, como entidades.",
+      "Add Map Image": "Añadir imagen de mapa",
+      "Adds the map image of the layer chosen in the catalogue under the layers, or takes it away.": "Añade la imagen de mapa de la capa elegida en el catálogo bajo las capas, o la quita.",
+      "Choose a layer in the catalogue first.": "Elija primero una capa en el catálogo.",
+      "{theme}: {n} layers. Choose one to read about it.": "{theme}: {n} capas. Elija una para leer sobre ella.",
+      "Dataset: {name}": "Conjunto de datos: {name}",
+      "Source: {credit}": "Fuente: {credit}",
+      "Read whole, in one download.": "Se lee completa, en una descarga.",
+      "Read in the map view at 1:{scale} or closer, up to {n} features at a time.": "Se lee en la vista del mapa a 1:{scale} o más cerca, hasta {n} entidades por vez.",
+      "It also has a map image.": "También tiene imagen de mapa.",
       "Join Table by CUT": "Unir tabla por CUT",
       "Joins a CSV table to communes, provinces or regions by their código único territorial (CUT) or their name: codes with or without the leading zero, names however they are spelt, and the codes of before Ñuble (2018) and Arica y Parinacota and Los Ríos (2007). The table may be semicolon-separated and in Windows-1252, with decimal commas.": "Une una tabla CSV a comunas, provincias o regiones por su código único territorial (CUT) o por su nombre: códigos con o sin el cero inicial, nombres como vengan escritos, y los códigos de antes de Ñuble (2018) y de Arica y Parinacota y Los Ríos (2007). La tabla puede venir separada por punto y coma, en Windows-1252 y con decimales con coma.",
       "Layer of communes, provinces or regions": "Capa de comunas, provincias o regiones",

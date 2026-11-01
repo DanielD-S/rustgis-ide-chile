@@ -10,8 +10,9 @@ Public geospatial services of Chile as one-click layers for RustGIS: the
 [Ministry of Energy](https://ide-energia.minenergia.cl).
 
 Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning,
-census data, roads, schools, health and tourism: 63 layers in a ribbon tab of their own, each a
-command that scripts, the command line and the AI Assistant can run too. Three **CUT tools** join
+census data, roads, schools, health and tourism: 62 layers in a ribbon tab of their own and in
+a searchable **catalogue panel** (see [The catalogue](#the-catalogue)), each a command that
+scripts, the command line and the AI Assistant can run too. Three **CUT tools** join
 any table of Chile to its communes, provinces or regions by their código único territorial,
 however it is written, assign communes to points, and complete codes and names (see
 [The CUT tools](#the-cut-tools)); **Layer Metadata** shows any layer's ISO 19115 record (see
@@ -41,10 +42,28 @@ however it is written, assign communes to points, and complete codes and names (
   attractions, street markets, sports facilities, Sendero de Chile (Geoportal de Chile)
 - **CUT**: Join Table by CUT, Assign Commune to Points, Complete CUT (geoprocessing tools, also
   in the Tools pane under Plugins › IDE Chile)
-- **Manage**: Layer Metadata (ISO 19115), About IDE Chile
+- **Manage**: IDE Chile Catalogue (the panel), Layer Metadata (ISO 19115), About IDE Chile
 
 The interface is in English with a full Spanish translation; layer names on the map are the
 datasets' own names.
+
+## The catalogue
+
+**IDE Chile Catalogue** (on the tab's Manage group, or Command Search) opens a pane beside the
+map with every layer in a tree of the tab's themes: Boundaries, Soils & Agriculture, Mining &
+Energy, Environment & Hazards, Cities & Housing, Census 2024 and 2017, Transport & Services. The
+box above it searches the layers by name as you type. Choose a layer to read what it is, its
+dataset and source, and how it is read (whole, or in the map view up to a scale); then **Add
+Layer** adds its features and **Add Map Image** its map image, where it has one (choose it again
+to take it away). Each theme shows how many layers it holds.
+
+The panel needs RustGIS 0.5.0 or later, the first with trees in plugin panels, and so does IDE
+Chile from 0.6.0 on. Its buttons are commands too: scripts and the command line choose the layer
+with `{"panel": {"layer": "<command id>"}}`:
+
+```sh
+rustgis-cli run --plugin ide-chile-0.6.0.rgplugin   --cmd 'plugin:ide-chile/catalogue-add={"panel":{"layer":"census-2024-regions"}}'
+```
 
 ## Features, read whole or in the map view
 
