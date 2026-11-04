@@ -37,8 +37,14 @@ SERNAGEOMIN = "https://services1.arcgis.com/OyjvVdFTl5hfSdX3/arcgis/rest/service
 SBAP = "https://services.arcgis.com/8NxRqxz24n3Tl3kM/arcgis/rest/services/{}/FeatureServer"
 DGA = "https://services3.arcgis.com/aSoEm9TBK2shtWjP/arcgis/rest/services/{}/FeatureServer"
 ENERGIA = "https://ide-energia.minenergia.cl/server/rest/services/IDE_Energia/{}/MapServer"
+# SERNAGEOMIN's mining cadastre on its own ArcGIS Server (0.6.2): the same concessions layer as the
+# ArcGIS Online `WGS84` service that 0.5.0 read and that was taken down in October 2026, with the
+# same fields (checked on 2026-11-04: 97,692 in force of 597,207, 208 with their geometry in a view
+# of Copiapó). Its map image would draw the eliminated ones too, so it is read as features only.
+SERNAGEOMIN_CADASTRE = "https://arcgisawa.sernageomin.cl/server/rest/services/VIEW_WGS84/FeatureServer"
 
 SERNAGEOMIN_CREDIT = "SERNAGEOMIN (sernageomin.maps.arcgis.com)"
+SERNAGEOMIN_CONCESSIONS_CREDIT = "SERNAGEOMIN, Departamento de Propiedad Minera (catastro minero)"
 SBAP_CREDIT = "Servicio de Biodiversidad y Áreas Protegidas (SBAP)"
 DGA_CREDIT = "DGA, Ministerio de Obras Públicas"
 ENERGIA_CREDIT = "IDE Energía, Ministerio de Energía (ide-energia.minenergia.cl)"
@@ -64,7 +70,7 @@ DPA_COARSE = 0.02
 
 # The smallest scale (largest denominator) a layer is read in the map view at, unless it says
 # otherwise (`max_scale`): a layer with tens of thousands of features in a view at 1:1,000,000
-# and 2,000 to a request, such as the mining concessions of 0.5.0, needs a closer one.
+# and 2,000 to a request, such as the mining concessions, needs a closer one.
 MAX_VIEW_SCALE = 2_000_000
 
 
@@ -111,7 +117,7 @@ def ine_2024(id, en, es, help_en, help_es, service, show=None, whole=False, icon
 
 
 def hosted(id, en, es, help_en, help_es, base, credit, show=None, whole=False, icon="point_layer", name=None, **kw):
-    """A layer of an ArcGIS Online hosted feature service, which draws no map image."""
+    """A layer of a feature service (ArcGIS Online hosted, or read without its map image)."""
     return arcgis(id, en, es, help_en, help_es, base, credit, show, whole, icon, name, tiles=False, **kw)
 
 
@@ -179,9 +185,7 @@ LAYERS = [
     # Mining and energy
     hosted("mining-installations", "Mining Installations", "Instalaciones mineras", "Mining installations registered by SERNAGEOMIN: mines, plants, tailings, waste dumps and more, with their company and operation. Read in the map view, up to 2,000 at a time.", "Instalaciones mineras catastradas por SERNAGEOMIN: minas, plantas, relaves, botaderos y otras, con su empresa y faena. Se lee en la vista del mapa, hasta 2.000 por vez.", SERNAGEOMIN.format("INSTALACIONES_MINERAS_20251126"), SERNAGEOMIN_CREDIT, name="Instalaciones mineras (SERNAGEOMIN)"),
     hosted("tailings", "Tailings Deposits 2025", "Catastro de relaves 2025", "The 2025 cadastre of mine tailings deposits (SERNAGEOMIN): active, inactive and abandoned, with their company, resource and volume.", "Catastro de depósitos de relaves 2025 (SERNAGEOMIN): activos, inactivos y abandonados, con su empresa, recurso y volumen.", SERNAGEOMIN.format("CDR_CHILE_PUNTUAL_2025"), SERNAGEOMIN_CREDIT, whole=True, name="Catastro de relaves 2025 (SERNAGEOMIN)"),
-    # Mining Concessions (0.5.0) went in 0.5.1: the service it read (SERNAGEOMIN's `WGS84`) was
-    # taken down in October 2026 and no other public copy of the cadastre was found. Its entry
-    # is in v0.5.0's table; `filter`, `fields` and `max_scale` stay for it to come back.
+    hosted("mining-concessions", "Mining Concessions", "Concesiones mineras", "SERNAGEOMIN's mining cadastre: the exploration and exploitation concessions in force (constituted or in process), with their roll number, name, hectares, holder and expiry; eliminated ones are left out. For consultation only: the Conservador de Minas' registry is the legal record. Read in the map view at 1:100,000 or closer, up to 2,000 at a time.", "Catastro minero de SERNAGEOMIN: las concesiones de exploración y explotación vigentes (constituidas o en trámite), con su rol, nombre, hectáreas, titular y vencimiento; las eliminadas quedan fuera. Solo para consulta: el registro legal es el del Conservador de Minas. Se lee en la vista del mapa a 1:100.000 o más cerca, hasta 2.000 por vez.", SERNAGEOMIN_CADASTRE, SERNAGEOMIN_CONCESSIONS_CREDIT, show=[2], icon="polygon_layer", name="Concesiones mineras vigentes (SERNAGEOMIN)", filter="SITUACION_CONCESION <> 'ELIMINADA'", fields="NUMERO_ROL,DV_ROL,NOMBRE,TIPO_CONCESION,SITUACION_CONCESION,HECTAREAS,FECHA_VENCIMIENTO,ESTACAMENTO_SALITRERO,TITULAR_NOMBRE,NRO_INSCRIPCION,FOJAS,ANO_INSCRIPCION,COMUNA,DPA_COMUNA,HUSO,FECHA_ACTUALIZACION", max_scale=100_000),
     arcgis("energy", "Energy", "Energía", "Power plants (solar, wind, hydro, thermal, bioenergy, geothermal), substations and transmission lines (Ministry of Energy). Read in the map view.", "Centrales de generación (solares, eólicas, hidroeléctricas, termoeléctricas, de bioenergía y geotérmicas), subestaciones y líneas de transmisión (Ministerio de Energía). Se lee en la vista del mapa.", ENERGIA.format("Visor_IDE_Energ%C3%ADa"), ENERGIA_CREDIT, show=[1, 2, 3, 4, 5, 6, 8, 10], icon="point_layer", name="Energía (Ministerio de Energía)"),
     # Hazards, protected areas and water
     hosted("volcanoes", "Volcanic Risk 2023", "Riesgo volcánico 2023", "SERNAGEOMIN's 2023 ranking of the specific risk of Chile's 87 active volcanoes.", "Ranking 2023 de riesgo específico de los 87 volcanes activos de Chile (SERNAGEOMIN).", SERNAGEOMIN.format("Ranking_Volcanes_Chile_2023"), SERNAGEOMIN_CREDIT, whole=True, name="Riesgo volcánico 2023 (SERNAGEOMIN)"),
@@ -213,7 +217,7 @@ ISO_RECORDS = {}
 # The ribbon tab: group label (en, es) and its items (ids, or menus).
 TAB = [
     ("Boundaries", "Límites", ["regions", "communes"]),
-    ("Resources", "Recursos", [("Soils & Agriculture", "Suelos y agricultura", "polygon_layer", "Soils, land use, properties, irrigation and crops (IDE MINAGRI).", "Suelos, uso de la tierra, propiedades, riego y cultivos (IDE MINAGRI).", ["soils", "land-use", "rural-properties", "irrigation", "erosion", "fruit-cadastre", "weather-stations", "summer-pastures", "hunting-ban"]), ("Mining & Energy", "Minería y energía", "point_layer", "Mining installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).", "Instalaciones mineras, relaves e infraestructura energética (SERNAGEOMIN, Ministerio de Energía).", ["mining-installations", "tailings", "energy"])]),
+    ("Resources", "Recursos", [("Soils & Agriculture", "Suelos y agricultura", "polygon_layer", "Soils, land use, properties, irrigation and crops (IDE MINAGRI).", "Suelos, uso de la tierra, propiedades, riego y cultivos (IDE MINAGRI).", ["soils", "land-use", "rural-properties", "irrigation", "erosion", "fruit-cadastre", "weather-stations", "summer-pastures", "hunting-ban"]), ("Mining & Energy", "Minería y energía", "point_layer", "Mining concessions, installations, tailings and energy infrastructure (SERNAGEOMIN, Ministry of Energy).", "Concesiones e instalaciones mineras, relaves e infraestructura energética (SERNAGEOMIN, Ministerio de Energía).", ["mining-concessions", "mining-installations", "tailings", "energy"])]),
     ("Environment", "Medio ambiente", [("Environment & Hazards", "Medio ambiente y riesgos", "relief", "Wildfires, volcanoes, protected areas, wetlands, water and climate.", "Incendios, volcanes, áreas protegidas, humedales, aguas y clima.", ["wildfires", "volcanoes", "protected-areas", "ramsar", "wetlands", "hydrography", "basins", "aquifers", "water-scarcity", "hydrometric-network", "climate-zones"])]),
     ("Cities", "Ciudades", [("Cities & Housing", "Ciudades y vivienda", "polygon_layer", "Urban planning and housing layers (IDE MINVU).", "Capas de planificación urbana y vivienda (IDE MINVU).", ["urban-limits", "risk-areas", "heritage", "urban-wetlands", "settlements", "urban-parks", "housing-deficit", "bike-lanes"])]),
     ("Census", "Censo", [("Census 2024", "Censo 2024", "stats", "Census 2024 boundaries, indicators and neighbourhood units (INE).", "Límites, indicadores y unidades vecinales del Censo 2024 (INE).", ["census-2024-regions", "census-2024-provinces", "census-2024-communes", "census-2024-commune-indicators", "census-2024-region-indicators", "census-2024-neighbourhoods"]), ("Census 2017", "Censo 2017", "stats", "Census 2017 figures and microdata (INE).", "Cifras y microdatos del Censo 2017 (INE).", ["census-regions", "census-provinces", "census-communes", "census-blocks", "census-localities", "census-cities", "census-towns", "census-villages", "census-hamlets"])]),
@@ -273,7 +277,7 @@ PANEL_MESSAGES = {
 
 PARAMS = '{"map"?: bool (the service\'s own map image as a web tile layer under the layers, instead of the features)}'
 
-VERSION = "0.6.1"
+VERSION = "0.6.2"
 DESCRIPTION = "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, the INE's Censuses 2024 and 2017, SERNAGEOMIN, SBAP, DGA and the Ministry of Energy. Boundaries, soils, land use, wetlands, protected areas, water, mining, energy, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names; Layer Metadata shows each layer's ISO 19115 record from the IDE Chile catalogue."
 DESCRIPTION_ES = "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU, los Censos 2024 y 2017 del INE, SERNAGEOMIN, SBAP, DGA y el Ministerio de Energía. Límites, suelos, uso de la tierra, humedales, áreas protegidas, agua, minería, energía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables. Las herramientas CUT unen cualquier tabla de Chile a sus comunas, provincias o regiones por su código único territorial, asignan comunas a puntos y completan códigos y nombres; Metadatos de la capa muestra el registro ISO 19115 de cada capa del catálogo de IDE Chile."
 

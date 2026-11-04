@@ -1469,6 +1469,21 @@ pub const CATALOG: &[Entry] = &[
         max_scale: 2000000.0,
     },
     Entry {
+        id: "mining-concessions",
+        name: "Concesiones mineras vigentes (SERNAGEOMIN)",
+        tiles: "",
+        service: "https://arcgisawa.sernageomin.cl/server/rest/services/VIEW_WGS84/FeatureServer",
+        kind: "arcgis",
+        layer: "",
+        subs: &[Sub { id: 2, name: "WGS84_Concesion", bbox: Some([-20037508.0, -18369189.0, 20037508.0, 20036052.0]), max: 2000 }],
+        whole: false,
+        credit: "SERNAGEOMIN, Departamento de Propiedad Minera (catastro minero)",
+        offset: 0.0001,
+        filter: "SITUACION_CONCESION <> 'ELIMINADA'",
+        fields: "NUMERO_ROL,DV_ROL,NOMBRE,TIPO_CONCESION,SITUACION_CONCESION,HECTAREAS,FECHA_VENCIMIENTO,ESTACAMENTO_SALITRERO,TITULAR_NOMBRE,NRO_INSCRIPCION,FOJAS,ANO_INSCRIPCION,COMUNA,DPA_COMUNA,HUSO,FECHA_ACTUALIZACION",
+        max_scale: 100000.0,
+    },
+    Entry {
         id: "energy",
         name: "Energía (Ministerio de Energía)",
         tiles: "https://ide-energia.minenergia.cl/server/rest/services/IDE_Energia/Visor_IDE_Energ%C3%ADa/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image&layers=show:1,2,3,4,5,6,8,10",
@@ -1830,6 +1845,11 @@ pub const THEMES: &[Theme] = &[
                 id: "theme-mining-energy",
                 label: "Mining & Energy",
                 items: &[
+                    Item::Layer {
+                        id: "mining-concessions",
+                        label: "Mining Concessions",
+                        help: "SERNAGEOMIN's mining cadastre: the exploration and exploitation concessions in force (constituted or in process), with their roll number, name, hectares, holder and expiry; eliminated ones are left out. For consultation only: the Conservador de Minas' registry is the legal record. Read in the map view at 1:100,000 or closer, up to 2,000 at a time.",
+                    },
                     Item::Layer {
                         id: "mining-installations",
                         label: "Mining Installations",
