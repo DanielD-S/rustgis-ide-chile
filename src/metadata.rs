@@ -1279,6 +1279,30 @@ pub const RECORDS: &[Record] = &[
         ],
     },
     Record {
+        entry: "mining-concessions",
+        sub: None,
+        source: "arcgis",
+        elements: &[
+            ("MD_Metadata.fileIdentifier", "https://arcgisawa.sernageomin.cl/server/rest/services/VIEW_WGS84/FeatureServer/2"),
+            ("MD_Metadata.contact", "SERNAGEOMIN, Departamento de Propiedad Minera (catastro minero)"),
+            (
+                "MD_Metadata.metadataStandardName",
+                "ISO 19115, elementos tomados del servicio ArcGIS REST (sin registro en el catálogo IDE Chile)",
+            ),
+            ("CI_Citation.title", "WGS84_Concesion"),
+            (
+                "MD_DataIdentification.abstract",
+                "Catastro geoespacial de concesiones mineras vigentes y no vigentes en Chile de exploración y explotación. Las concesiones están identificadas con cada uno de sus vértices y contienen información como: Identificación de la concesión Número de rol y dígito verificador Nombre de la concesión Características generales Superficie en hectáreas Información legal Tipo de concesión Situación actual Datos de inscripción (número, fojas y año) Origen del registro Vigencia Fecha de vencimiento Ubicación Comuna asociada Sistema de referencia (datum y huso) Titularidad Nombre del titular RUT y dígito verificador División asociada Clasificación específica Condición de estacamento salitrero Información espacial Área y longitud de la geometría (calculadas automáticamente) Fechas de referencia Fecha de creación Fecha de última actualización",
+            ),
+            (
+                "MD_DataIdentification.pointOfContact",
+                "SERNAGEOMIN – Departamento de Planificación (Subdepartamento de Inteligencia de Datos) y Departamento de Propiedad Minera (pointOfContact)",
+            ),
+            ("MD_ReferenceSystem.referenceSystemIdentifier", "EPSG:4326"),
+            ("CI_OnlineResource.linkage", "https://arcgisawa.sernageomin.cl/server/rest/services/VIEW_WGS84/FeatureServer/2"),
+        ],
+    },
+    Record {
         entry: "energy",
         sub: Some(1),
         source: "csw",

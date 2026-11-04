@@ -611,34 +611,18 @@ mod tests {
         assert!(r[0].1.contains("/MapServer/9/query?"), "{}", r[0].1);
     }
 
-    /// A layer with its own filter, fields and closest scale: Mining Concessions as 0.5.0 read it,
-    /// before its service was taken down.
-    const CONCESSIONS: Entry = Entry {
-        id: "mining-concessions",
-        name: "Concesiones mineras vigentes (SERNAGEOMIN)",
-        tiles: "",
-        service: "https://services1.arcgis.com/OyjvVdFTl5hfSdX3/arcgis/rest/services/WGS84/FeatureServer",
-        kind: "arcgis",
-        layer: "",
-        subs: &[Sub { id: 2, name: "WGS84_Concesion", bbox: None, max: 2000 }],
-        whole: false,
-        credit: "SERNAGEOMIN, Departamento de Propiedad Minera (catastro minero)",
-        offset: 0.0001,
-        filter: "SITUACION_CONCESION <> 'ELIMINADA'",
-        fields: "NUMERO_ROL,DV_ROL,NOMBRE,TIPO_CONCESION,SITUACION_CONCESION,HECTAREAS,TITULAR_NOMBRE,COMUNA",
-        max_scale: 100_000.0,
-    };
-
     #[test]
     fn a_layer_is_read_filtered_and_close() {
-        let c = &CONCESSIONS;
+        // Mining Concessions: its own filter, fields and closest scale.
+        let c = CATALOG.iter().find(|e| e.id == "mining-concessions").unwrap();
+        assert_eq!(c.max_scale, 100_000.0);
         let v = view_of(&json!({"center": [-70.3, -27.4], "scale": 100000.0})).unwrap();
         let r = reads(c, Some(v));
         assert_eq!(r.len(), 1);
         assert_eq!(r[0].0, "Concesiones mineras vigentes (SERNAGEOMIN)");
         assert!(
             r[0].1.contains(
-                "/WGS84/FeatureServer/2/query?where=SITUACION_CONCESION%20%3C%3E%20%27ELIMINADA%27&outFields=NUMERO_ROL%2CDV_ROL%2CNOMBRE"
+                "arcgisawa.sernageomin.cl/server/rest/services/VIEW_WGS84/FeatureServer/2/query?where=SITUACION_CONCESION%20%3C%3E%20%27ELIMINADA%27&outFields=NUMERO_ROL%2CDV_ROL%2CNOMBRE"
             ),
             "{}",
             r[0].1

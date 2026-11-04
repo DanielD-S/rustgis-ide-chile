@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.2 (2026-11-04)
+
+- **Mining Concessions** is back, on Mining & Energy and in the catalogue: SERNAGEOMIN's mining
+  cadastre, now read from its own ArcGIS Server (`arcgisawa.sernageomin.cl`, `VIEW_WGS84`), the
+  same concessions layer with the same fields as 0.5.0's ArcGIS Online `WGS84` service, which was
+  taken down. The concessions in force (97,692 of 597,207), with their roll, name, type,
+  hectares, expiry, holder's name, registration and commune; the holder's RUT isn't read. Read
+  in the map view at 1:100,000 or closer (918 in a view of Copiapó). Its ISO 19115 record comes
+  from the service.
+- 63 layers, 67 commands.
+
 ## 0.6.1 (2026-11-01)
 
 - The catalogue's **Add Layer** and **Add Map Image** buttons sit under the tree, over the

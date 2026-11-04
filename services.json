@@ -3550,5 +3550,58 @@
     "max": 1000
    }
   ]
+ },
+ "mining-concessions": {
+  "service": "https://arcgisawa.sernageomin.cl/server/rest/services/VIEW_WGS84/FeatureServer",
+  "layers": [
+   {
+    "id": 0,
+    "name": "WGS84_Vertice",
+    "geometry": "esriGeometryPoint",
+    "bbox": [
+     -20037508,
+     -18369189,
+     20037508,
+     20036052
+    ],
+    "max": 2000
+   },
+   {
+    "id": 1,
+    "name": "WGS84_Pertenencia",
+    "geometry": "esriGeometryPolygon",
+    "bbox": [
+     -8084085,
+     -7017152,
+     -7683376,
+     -2080865
+    ],
+    "max": 2000
+   },
+   {
+    "id": 2,
+    "name": "WGS84_Concesion",
+    "geometry": "esriGeometryPolygon",
+    "bbox": [
+     -20037508,
+     -18369189,
+     20037508,
+     20036052
+    ],
+    "max": 2000
+   },
+   {
+    "id": 3,
+    "name": "WGS84_Demasia",
+    "geometry": "esriGeometryPolygon",
+    "bbox": [
+     -20037508,
+     -7017152,
+     20037508,
+     20036052
+    ],
+    "max": 2000
+   }
+  ]
  }
 }
